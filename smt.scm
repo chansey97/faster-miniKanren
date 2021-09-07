@@ -73,8 +73,9 @@
                (R (cdr ds-R))
                (ds (filter-redundant-declares ds ds))
                (_ (set! decls (append (map cadr ds) decls)))
-               (dc (map (lambda (x) `(declare-const ,x Int))
-                        (filter undeclared? (map reify-v-name vs)))))
+               ;; (dc (map (lambda (x) `(declare-const ,x Int))
+               ;;          (filter undeclared? (map reify-v-name vs))))
+               (dc '()))
           (list
            dd
            (append
@@ -174,8 +175,8 @@
                  (undeclared-assumptions (filter (lambda (x) (undeclared? (cadr x))) new-assumptions))
                  (actual-lines (append undeclared-decls undeclared-assumptions other-lines)))
             (let* ((rs (filter undeclared? (map reify-v-name (cdr (assq a relevant-vars)))))
-                   (undeclared-rs (map (lambda (x) `(declare-const ,x Int)) rs))
-                   (actual-lines (append undeclared-rs actual-lines)))
+                   ;; (undeclared-rs (map (lambda (x) `(declare-const ,x Int)) rs))
+                   (actual-lines (append #;undeclared-rs actual-lines)))
               (set! all-assumptions (append (map cadr undeclared-assumptions) all-assumptions))
               (set! local-buffer (append local-buffer actual-lines))
               (call-z3 actual-lines))))))))
@@ -212,7 +213,7 @@
 
 (define assumption-count 0)
 (define (fresh-assumption)
-  (when (and (= (remainder assumption-count 1000) 0)
+  (when (and (= (remainder assumption-count 1000000) 0)
              (> assumption-count 0))
     (printf "gc z3...\n")
     (z/gc!))
