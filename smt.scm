@@ -122,8 +122,7 @@
                      (lambda (ds)
                        `(not (= ,(car ds) ,(cdr ds))))
                      cs)))
-              as))
-         #t)
+              as)))
         (lambdag@ (st) st))))
 
 (define z/varo
@@ -209,7 +208,7 @@
                                (if a #f st))))))))
 
 (define (z/ line)
-  (z/check (list line) #f #t))
+  (z/check (list line) #f #f))
 
 (define assumption-count 0)
 (define (fresh-assumption)
