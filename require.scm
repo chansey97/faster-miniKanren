@@ -1,5 +1,5 @@
 (load "mk-vicare.scm")
 (load "mk.scm")
 (load "smt.scm")
-(load "../clpsmt-miniKanren/z3-server.scm")
-(load "../clpsmt-miniKanren/test-check.scm")
+(load "z3-server.scm")
+(load "test-check.scm")
