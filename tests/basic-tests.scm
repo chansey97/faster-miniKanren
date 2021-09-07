@@ -68,6 +68,7 @@
       ((z/ `(declare-const ,q Int))
        (z/assert `(= ,q 2)))
       ))
+;; (1 2)
 ;; (reset)
 ;; (declare-const _v0 Int)
 ;; (declare-const _a1 Bool)
@@ -86,8 +87,29 @@
 ;; (assert (=> _a2 (= _v0 1)))
 ;; (check-sat-assuming ((not _a1) _a2))
 ;; sat
-;; (declare-const _v0 Int)
 ;; (declare-const _a3 Bool)
 ;; (assert (=> _a3 (= _v0 2)))
 ;; (check-sat-assuming ((not _a1) (not _a2) _a3))
-;; (error line 11 column 22: invalid declaration, constant '_v0' (with the given signature) already declared)
+;; sat
+;; (check-sat-assuming ((not _a1) (not _a2) _a3))
+;; sat
+;; (get-model)
+;; (
+;;   model
+;;   (define-fun _a3 () Bool true)
+;;   (define-fun _v0 () Int 2)
+;;   (define-fun _a1 () Bool false)
+;;   (define-fun _a2 () Bool false)
+;; )
+;; (declare-const _a4 Bool)
+;; (assert (=> _a4 (= _v0 2)))
+;; (check-sat-assuming ((not _a1) (not _a2) (not _a3) _a4))
+;; sat
+;; (declare-const _a5 Bool)
+;; (assert (=> _a5 (or (not (= _v0 1)))))
+;; (check-sat-assuming (_a1 (not _a2) (not _a3) (not _a4) _a5))
+;; unsat
+;; (declare-const _a6 Bool)
+;; (assert (=> _a6 (or (not (= _v0 2)))))
+;; (check-sat-assuming ((not _a1) (not _a2) _a3 (not _a4) (not _a5) _a6))
+;; unsat
