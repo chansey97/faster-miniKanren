@@ -121,3 +121,60 @@
             (z/assert `(= ,a #f))
             (== q `(,a ,b))))
 ;; ((#f #f))
+
+;; https://github.com/namin/clpsmt-miniKanren/issues/10
+
+;; Declare a fresh variable at the top
+(define add1o
+  (lambda (n out)
+    (fresh ()
+           (z/assert `(= ,out (+ ,n 1))))))
+
+(run 5 (q)
+     (fresh (n out)
+            (z/ `(declare-const ,n Int))
+            (z/ `(declare-const ,out Int))
+            (add1o n out)
+            (== q `(,n ,out))))
+;; ((-1 0) (-2 -1) (-3 -2) (-4 -3) (-5 -4))
+
+(run 5 (q)
+     (fresh (n)
+            (z/ `(declare-const ,n Int))
+            (add1o n 1)
+            (== q n)))
+;; (1)
+
+(run 5 (q)
+     (fresh (out)
+            (z/ `(declare-const ,out Int))
+            (add1o 1 out)
+            (== q out)))
+;; (2)
+
+;; Declare a variable, but that variable has already been unified with a constant.
+(define add1o
+  (lambda (n out)
+    (fresh ()
+           (z/ `(declare-const ,n Int))
+           (z/ `(declare-const ,out Int))
+           (z/assert `(= ,out (+ ,n 1))))))
+
+(run 5 (q)
+     (fresh (n out)
+            (add1o n out)
+            (== q `(,n ,out))))
+;; ((-1 0) (-2 -1) (-3 -2) (-4 -3) (-5 -4))
+
+(run 5 (q)
+     (fresh (n)
+            (add1o n 1)
+            (== q n)))
+;; (reset)
+;; (declare-const _v4 Int)
+;; (declare-const 1 Int)
+;; (declare-const _a1 Bool)
+;; (assert (=> _a1 (= 1 (+ _v4 1))))
+;; (check-sat-assuming (_a1))
+;; (error line 57 column 15: invalid constant declaration, symbol expected)
+
