@@ -263,6 +263,7 @@
 (define assumption-chains '())
 (define all-assumptions '())
 (define (z/reset!)
+  (init-log)
   (call-z3 '((reset)))
   (set! decls '())
   (set! relevant-vars '())
