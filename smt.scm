@@ -34,6 +34,19 @@
          (cdr ds)
          (cons (car ds) (filter-redundant-declare (car ds) es))))))
 
+(define redundant-declare^?
+  (lambda (d ds)
+    (if (null? ds)
+        #f
+        (let ((e  (car ds))
+              (es (cdr ds)))
+          (or (equal? d e)
+              (redundant-declare^? d es))))))
+
+(define filter-redundant-declares^
+  (lambda (ds ds^)
+    (remp (lambda (d) (redundant-declare^? d ds^)) ds)))
+
 (define decls '())
 (define undeclared?
   (lambda (x)
@@ -71,7 +84,10 @@
                (ds-R (partition declares? M))
                (ds (car ds-R))
                (R (cdr ds-R))
-               (ds (filter-redundant-declares ds ds))
+               (M^ (state-M st))
+               (ds-R^ (partition declares? M^))
+               (ds^ (car ds-R^))
+               (ds (filter-redundant-declares^ ds ds^))
                (_ (set! decls (append (map cadr ds) decls)))
                ;; (dc (map (lambda (x) `(declare-const ,x Int))
                ;;          (filter undeclared? (map reify-v-name vs))))

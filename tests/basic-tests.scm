@@ -40,7 +40,7 @@
             (== a b)
             (z/ `(declare-const ,a Int))
             (z/assert `(= ,a 5))
-            (z/ `(declare-const ,b Int)) ; <--- crash, duplcate declares!
+            (z/ `(declare-const ,b Int))
             ))
 ;; (reset)
 ;; (declare-const _v2 Int)
@@ -48,6 +48,15 @@
 ;; (assert (=> _a1 (= _v2 5)))
 ;; (check-sat-assuming (_a1))
 ;; sat
-;; (declare-const _v2 Int)
 ;; (check-sat-assuming (_a1))
-;; (error line 6 column 22: invalid declaration, constant '_v2' (with the given signature) already declared)
+;; sat
+;; (get-model)
+;; (
+;;   model
+;;   (define-fun _a1 () Bool true)
+;;   (define-fun _v2 () Int 5)
+;; )
+;; (declare-const _a2 Bool)
+;; (assert (=> _a2 (= _v2 5)))
+;; (check-sat-assuming ((not _a1) _a2))
+;; sat
