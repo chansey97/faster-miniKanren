@@ -55,14 +55,14 @@
       (when log-all-calls (printf "~a\n" m))
       (map (lambda (x)
              (cons (cadr x)
-                   (if (null? (caddr x))
-                       (let ([r (cadddr (cdr x))])
-                         (cond
-                           ((eq? r 'false) #f)
-                           ((eq? r 'true) #t)
-                           ((and (pair? (cadddr x)) (eq? (cadr (cadddr x)) 'BitVec)) r)
-                           (else (eval r))))
-                       `(lambda ,(map car (caddr x)) ,(cadddr (cdr x))))))
+               (if (null? (caddr x))
+                   (let ([r (cadddr (cdr x))])
+                     (cond
+                       ((eq? r 'false) #f)
+                       ((eq? r 'true) #t)
+                       ((and (pair? (cadddr x)) (eq? (cadr (cadddr x)) 'BitVec)) r)
+                       (else (eval r))))
+                   `(lambda ,(map car (caddr x)) ,(cadddr (cdr x))))))
            (cdr m)))))
 
 (define get-model-inc
@@ -79,14 +79,14 @@
 (define neg-model
   (lambda (model)
     (cons
-     'assert
-     (list
-      (cons
-       'or
-       (map
-        (lambda (xv)
-          `(not (= ,(car xv) ,(cdr xv))))
-        model))))))
+        'assert
+      (list
+       (cons
+           'or
+         (map
+          (lambda (xv)
+            `(not (= ,(car xv) ,(cdr xv))))
+          model))))))
 
 (define get-next-model
   (lambda (xs ms)
