@@ -113,3 +113,11 @@
 ;; (assert (=> _a6 (or (not (= _v0 2)))))
 ;; (check-sat-assuming ((not _a1) (not _a2) _a3 (not _a4) (not _a5) _a6))
 ;; unsat
+
+(run 1 (q)
+     (fresh (a b)
+            (== a b)
+            (z/ `(declare-const ,a Bool))
+            (z/assert `(= ,a #f))
+            (== q `(,a ,b))))
+;; ((#f #f))

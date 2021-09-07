@@ -128,6 +128,7 @@
     (let* ([ms (map (lambda (m)
                       (filter (lambda (x) ; ignoring functions
                                 (or (number? (cdr x))
+                                    (boolean? (cdr x))
                                     (symbol? (cdr x)) ; for bitvectors
                                     )) m))
                     ms)])

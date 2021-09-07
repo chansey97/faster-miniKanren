@@ -112,6 +112,7 @@
 (define (smt-ok? st x)
   (let ((x (walk* x (state-S st))))
     (or (number? x)
+        (boolean? x)
         (and (var? x)
              (let ((c (lookup-c x st)))
                (c-M c))))))
@@ -177,10 +178,11 @@
       (let ((lines (reverse r)))
         (let ((new-decls  (filter (lambda (x)
                                     (and (declares? x)
-                                         (not (eq? (caddr x) 'Bool))))
+                                         (not (equal? (substring (symbol->string (cadr x)) 0 2) "_a"))))
                                   lines))
               (new-assumptions (filter (lambda (x)
                                          (and (declares? x)
+                                              (equal? (substring (symbol->string (cadr x)) 0 2) "_a")
                                               (eq? (caddr x) 'Bool)))
                                        lines))
               (other-lines (filter (lambda (x) (not (declares? x))) lines)))
@@ -215,7 +217,6 @@
                                                   st
                                                   (bind*
                                                    st
-                                                   (numbero (car vs))
                                                    (z/varo (car vs))
                                                    (loop (cdr vs))))))
                                   st))
@@ -308,6 +309,7 @@
     (let* ([m
             (filter (lambda (x) ; ignoring functions
                       (or (number? (cdr x))
+                          (boolean? (cdr x))
                           (symbol? (cdr x)) ; for bitvectors
                           )) m)])
       (if (null? m)
