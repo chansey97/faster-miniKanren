@@ -381,7 +381,7 @@
                ; this inc triggers interleaving
                (inc
                 (let ((scope (subst-scope (state-S st))))
-                  (let ((x (var scope)) ...)
+                  (let* ((x (var scope)) ...)
                     (bind* (g0 st) g ...))))))))
 
 
