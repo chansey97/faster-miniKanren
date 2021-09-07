@@ -170,11 +170,26 @@
      (fresh (n)
             (add1o n 1)
             (== q n)))
+;; (0)
 ;; (reset)
-;; (declare-const _v4 Int)
-;; (declare-const 1 Int)
+;; (declare-const _v1 Int)
 ;; (declare-const _a1 Bool)
-;; (assert (=> _a1 (= 1 (+ _v4 1))))
+;; (assert (=> _a1 (= 1 (+ _v1 1))))
 ;; (check-sat-assuming (_a1))
-;; (error line 57 column 15: invalid constant declaration, symbol expected)
-
+;; sat
+;; (check-sat-assuming (_a1))
+;; sat
+;; (get-model)
+;; (
+;;   model
+;;   (define-fun _v1 () Int 0)
+;;   (define-fun _a1 () Bool true)
+;; )
+;; (declare-const _a2 Bool)
+;; (assert (=> _a2 (= _v1 0)))
+;; (check-sat-assuming ((not _a1) _a2))
+;; sat
+;; (declare-const _a3 Bool)
+;; (assert (=> _a3 (or (not (= _v1 0)))))
+;; (check-sat-assuming (_a1 (not _a2) _a3))
+;; unsat

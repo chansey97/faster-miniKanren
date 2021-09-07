@@ -15,7 +15,7 @@
     (and (pair? s)
          (or (eq? 'declare-fun (car s))
              (eq? 'declare-const (car s)))
-         (cadr s))))
+         )))
 
 (define filter-redundant-declare
   (lambda (d es)
@@ -223,7 +223,13 @@
                                (if a #f st))))))))
 
 (define (z/ line)
-  (z/check (list line) #f #f))
+  (lambdag@ (st)
+            (let* ((S (state-S st))
+                   (m (remp (lambda (x)
+                              (and declares?
+                                   (not (var? (cadr (walk* x S)))) ))
+                            (list line))))
+              ((z/check m #f #f) st))))
 
 (define assumption-count 0)
 (define (fresh-assumption)
