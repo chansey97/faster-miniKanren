@@ -422,3 +422,24 @@
              (smt-asserto `(= ,q 2.0)))
             ))
       '(1 2.0))
+
+;; Tricky problem!
+;; The smt-asserto can include arbitrary formulas, which may include incompatible types.
+;; Should we do type-check in miniKanren or just use error messages from SMT solver?
+(run 1 (q)
+     (fresh (a b)
+            (== a b)
+            (smt-typeo a 'Int)
+            (smt-asserto `(= ,a #f))
+            (== q `(,a ,b))))
+;; (reset)
+;; (declare-const _v112 Int)
+;; (declare-const _a1 Bool)
+;; (assert (=> _a1 (= (as _v112 Int) (as _v112 Int))))
+;; (check-sat-assuming (_a1))
+;; sat
+;; (declare-const _a2 Bool)
+;; (assert (=> _a2 (= (as _v112 Int) false)))
+;; (check-sat-assuming (_a1 _a2))
+;; (error line 676 column 39: Sorts Int and Bool are incompatible)
+
