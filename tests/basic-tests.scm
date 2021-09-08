@@ -426,6 +426,7 @@
 ;; Tricky problem!
 ;; The smt-asserto can include arbitrary formulas, which may include incompatible types.
 ;; Should we do type-check in miniKanren or just use error messages from SMT solver?
+;; Or even just report this error?
 (run 1 (q)
      (fresh (a b)
             (== a b)
