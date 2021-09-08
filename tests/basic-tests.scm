@@ -208,7 +208,7 @@
             (z/ `(declare-const ,b Int))
             (z/assert `(= ,b 6))
 
-            (== a b)
+            (== a b) ; <-- promote the `==` to SMT assert 
             
             (nevero)))
 ;; ()
@@ -226,5 +226,111 @@
 ;; (declare-const _a3 Bool)
 ;; (assert (=> _a3 (= _v1 _v2)))
 ;; (check-sat-assuming (_a1 _a2 _a3))
+;; unsat
+
+(define (nevero)
+  (conde
+   [(== 1 2)]
+   [(nevero)]))
+
+(run 1 (q)
+     (fresh (a b)
+            
+            (=/= a b)
+            
+            (z/ `(declare-const ,a Int))
+            (z/assert `(= ,a 5))
+
+            (z/ `(declare-const ,b Int))
+            (z/assert `(= ,b 5)) ; <-- promote the above `=/=` to SMT assert 
+
+            (nevero)))
+;; ()
+;; (reset)
+;; (declare-const _v1 Int)
+;; (declare-const _a1 Bool)
+;; (assert (=> _a1 (= _v1 5)))
+;; (check-sat-assuming (_a1))
+;; sat
+;; (declare-const _v2 Int)
+;; (declare-const _a2 Bool)
+;; (assert (=> _a2 (= _v2 5)))
+;; (check-sat-assuming (_a1 _a2))
+;; sat
+;; (declare-const _a3 Bool)
+;; (assert (=> _a3 (and (or (not (= _v1 _v2))))))
+;; (check-sat-assuming (_a1 _a2 _a3))
+;; unsat
+
+(run 3 (q)
+     (fresh (a b)
+            (=/= a b)
+            (z/ `(declare-const ,a Int))
+            (z/assert `(= ,a 5)) ; <-- won't actually promote the above `=/=` to SMT assert, because b is not a SMT variable
+            (== q `(,a ,b))))
+;; (((5 _.0) (=/= ((_.0 5)))))
+;; (reset)
+;; (declare-const _v1 Int)
+;; (declare-const _a1 Bool)
+;; (assert (=> _a1 (= _v1 5)))
+;; (check-sat-assuming (_a1))
+;; sat
+;; (declare-const _a2 Bool)
+;; (assert (=> _a2 (= _v1 6)))
+;; (check-sat-assuming (_a1 _a2))
+;; unsat
+
+(define (nevero)
+  (conde
+   [(== 1 2)]
+   [(nevero)]))
+
+(run 1 (q)
+     (fresh (a b)
+
+            (z/ `(declare-const ,a Int))
+            (z/assert `(= ,a 5))
+
+            (z/ `(declare-const ,b Int))
+            (z/assert `(= ,b 5))
+            
+            (=/= a b) ; <-- promote the `=/=` to SMT assert 
+            
+            (nevero)))
+;; ()
+;; (reset)
+;; (declare-const _v1 Int)
+;; (declare-const _a1 Bool)
+;; (assert (=> _a1 (= _v1 5)))
+;; (check-sat-assuming (_a1))
+;; sat
+;; (declare-const _v2 Int)
+;; (declare-const _a2 Bool)
+;; (assert (=> _a2 (= _v2 5)))
+;; (check-sat-assuming (_a1 _a2))
+;; sat
+;; (declare-const _a3 Bool)
+;; (assert (=> _a3 (and (or (not (= _v1 _v2))))))
+;; (check-sat-assuming (_a1 _a2 _a3))
+;; unsat
+
+(run 1 (q)
+     (fresh (a b)
+            (=/= a b)
+            (z/ `(declare-const ,a Int))
+            (z/ `(declare-const ,b Int))
+            (z/assert `(= (- ,a ,b) 0))  ; <-- promote the above `=/=` to SMT assert 
+            ))
+;; ()
+;; (reset)
+;; (declare-const _v1 Int)
+;; (declare-const _v2 Int)
+;; (declare-const _a1 Bool)
+;; (assert (=> _a1 (= (- _v1 _v2) 0)))
+;; (check-sat-assuming (_a1))
+;; sat
+;; (declare-const _a2 Bool)
+;; (assert (=> _a2 (and (or (not (= _v1 _v2))))))
+;; (check-sat-assuming (_a1 _a2))
 ;; unsat
 
