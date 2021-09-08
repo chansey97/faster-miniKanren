@@ -438,4 +438,26 @@
             ))
 ;; ((_.0 (=/= ((_.0 0)))))
 
+;; An example of SMT type propagation
+(run 1 (q)
+     (fresh (a b)
+
+            (z/ `(declare-const ,a Int))
+            (z/assert `(= ,a 5))
+
+            (== a b)
+            ; should be promote to SMT assert,
+            ; because if `b` is fresh, the type of `b` must be equal to the type of `a`.
+            ; so ideally miniKanren can automatically declare `b`.
+            ))
+;; (reset)
+;; (declare-const _v1 Int)
+;; (declare-const _a1 Bool)
+;; (assert (=> _a1 (= _v1 5)))
+;; (check-sat-assuming (_a1))
+;; sat
+;; (declare-const _a2 Bool)
+;; (assert (=> _a2 (= _v1 _v2)))
+;; (check-sat-assuming (_a1 _a2))
+;; (error line 7 column 23: unknown constant _v2)
 
