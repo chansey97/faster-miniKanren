@@ -190,19 +190,24 @@
            (numbero a1)
            (numbero a2)
            (numbero val)
+           (smt-typeo a1 'Int)
+           (smt-typeo a2 'Int)
+           (smt-typeo val 'Int)
            (conde
             ((== prim-id '/)
-             (z/assert `(not (= ,a2 0))))
+             (smt-asserto `(not (= ,a2 0))))
             ((=/= prim-id '/)))
-           (z/assert `(= ,val (,prim-id ,a1 ,a2))))]
+           (smt-asserto `(= ,val (,prim-id ,a1 ,a2))))]
    [(== prim-id '!=)
     (fresh (a1 a2)
            (== `(,a1 ,a2) a*)
            (numbero a1)
            (numbero a2)
+           (smt-typeo a1 'Int)
+           (smt-typeo a2 'Int)
            (conde
-            [(== #t val) (z/assert `(not (= ,a1 ,a2)))]
-            [(== #f val) (z/assert `(= ,a1 ,a2))]))]
+            [(== #t val) (smt-asserto `(not (= ,a1 ,a2)))]
+            [(== #f val) (smt-asserto `(= ,a1 ,a2))]))]
    [(conde
      [(== prim-id '=)]
      [(== prim-id '>)]
@@ -216,9 +221,11 @@
            ;; (list-of-numbero a*)
            (numbero a1)
            (numbero a2)
+           (smt-typeo a1 'Int)
+           (smt-typeo a2 'Int)
            (conde
-            [(== #t val) (z/assert `(,prim-id ,a1 ,a2))]
-            [(== #f val) (z/assert `(not (,prim-id ,a1 ,a2)))]))]
+            [(== #t val) (smt-asserto `(,prim-id ,a1 ,a2))]
+            [(== #f val) (smt-asserto `(not (,prim-id ,a1 ,a2)))]))]
    ))
 
 (define (prim-expo expr env val)
