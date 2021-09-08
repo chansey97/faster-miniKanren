@@ -251,7 +251,8 @@
   (let ((r (filter (lambda (x) (and (pair? x)
                                     (eq? 'assert (car x))
                                     (pair? (cadr x))
-                                    (eq? (car (cadr x)) '=>)))
+                                    (eq? (car (cadr x)) '=>)
+                                    (equal? (substring (symbol->string (cadr (cadr x))) 0 2) "_a")))
                    m)))
     (if (null? r)
         'true
