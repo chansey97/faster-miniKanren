@@ -445,10 +445,22 @@
                     ((type-pred term) st)
                     ((var? term)
                      (let* ((c (lookup-c term st))
-                            (T (c-T c)))
+                            (T (c-T c))
+                            (M (c-M c)))
                        (cond
-                         ((eq? T type-id) st)
-                         ((not T) (set-c term (c-with-T c type-id) st))
+                         ((not M)
+                          (cond
+                            ((eq? T type-id) st) 
+                            ((not T) (set-c term (c-with-T c type-id) st)) ; T=#f
+                            (else #f) ; T != with typeid
+                            ))
+                         ((or (eq? M 'Int) (eq? M 'Real))
+                          (cond
+                            ((eq? T 'numbero) st) ; T = numbero
+                            ((and (not T) (eq? 'numbero type-id)) ; T = #f and type-id = numbero
+                             (set-c term (c-with-T c type-id) st))
+                            (else #f) ; T != 'numbero or type-id != numbero
+                            ))
                          (else #f))))
                     (else #f)))))))
 
@@ -548,7 +560,8 @@
                             (list (numbero (rhs a)))
                             '())
                         (if (c-M old-c)
-                            (list (add-smt-equality (lhs a) (rhs a)))
+                            ;; SMT type propagation
+                            (list (add-smt-equality (lhs a) (rhs a) (c-M old-c)))
                             '())
                         (map (lambda (atom) (absento atom (rhs a))) (c-A old-c))
                         (map (lambda (d) (=/=* d)) (c-D old-c)))))))))

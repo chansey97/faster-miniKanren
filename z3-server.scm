@@ -89,15 +89,19 @@
         (close-output-port p^))
       (when log-all-calls (printf "~a\n" m))
       (map (lambda (x)
-             (cons (cadr x)
-               (if (null? (caddr x))
-                   (let ([r (cadddr (cdr x))])
-                     (cond
-                       ((eq? r 'false) #f)
-                       ((eq? r 'true) #t)
-                       ((and (pair? (cadddr x)) (eq? (cadr (cadddr x)) 'BitVec)) r)
-                       (else (eval r))))
-                   `(lambda ,(map car (caddr x)) ,(cadddr (cdr x))))))
+             (let ((id (cadr x))
+                   (params (caddr x))
+                   (type (cadddr x))
+                   (val (car (cddddr x)) ))
+               (cond
+                 ((null? params)
+                  (let ((val (cond
+                               ((eq? val 'false) #f)
+                               ((eq? val 'true) #t)
+                               (else (eval val)))))
+                    (list id val type)))
+                 (else (error 'read-model "doesn't support functions params" params)))
+               ))
            (cdr m)))))
 
 (define get-model-inc
@@ -120,8 +124,12 @@
            'or
          (map
           (lambda (xv)
-            `(not (= ,(car xv) ,(cdr xv))))
-          model))))))
+            (let ((id (car xv))
+                  (val (cadr xv))
+                  (type (caddr xv)))
+              `(not (= (as ,id ,type) ,val))
+              )) model))))
+    ))
 
 (define get-next-model
   (lambda (xs ms)
