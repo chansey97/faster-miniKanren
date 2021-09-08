@@ -547,7 +547,7 @@
                             (list (numbero (rhs a)))
                             '())
                         (if (c-M old-c)
-                            (list (z/assert (list '= (lhs a) (rhs a)) #t))
+                            (list (add-smt-equality (lhs a) (rhs a)))
                             '())
                         (map (lambda (atom) (absento atom (rhs a))) (c-A old-c))
                         (map (lambda (d) (=/=* d)) (c-D old-c)))))))))

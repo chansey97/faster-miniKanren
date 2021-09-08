@@ -109,6 +109,11 @@
   (call-z3 `((check-sat-assuming ,(get-assumptions a))))
   (read-sat))
 
+(define (add-smt-equality v t)
+  (lambdag@ (st)
+            ((z/assert `(= ,v ,t) #t) st)
+            ))
+
 (define (smt-ok? st x)
   (let ((x (walk* x (state-S st))))
     (or (number? x)
