@@ -342,21 +342,100 @@
 (run 1 (q)
      (fresh (a b c d)
             (=/= (list a b) (list c d))
-            ; disequality constraint information is attached to `a` and `c` only
-            
+
             (z/ `(declare-const ,a Int))
             (z/ `(declare-const ,c Int))
             (z/assert `(< ,a 2))
             (z/assert `(> ,a 0))
             (z/assert `(= ,c 1))
-            ; domain of `a` and `c` both restricted to the single value `1`, but miniKanren doesn't know that...
-            
+
             (== b d)
-            ; should fail, but won't if disequality information is only on `a` and `c`.
-     
+ 
             (nevero)
             ))
-;; diverge
-;; idealy `(== b d)` should promote `(=/= a c)` to assert `(not (= a c))`
+;; ()
+;; (reset)
+;; (declare-const _v1 Int)
+;; (declare-const _v3 Int)
+;; (declare-const _a1 Bool)
+;; (assert (=> _a1 (< _v1 2)))
+;; (check-sat-assuming (_a1))
+;; sat
+;; (declare-const _a2 Bool)
+;; (assert (=> _a2 (> _v1 0)))
+;; (check-sat-assuming (_a1 _a2))
+;; sat
+;; (declare-const _a3 Bool)
+;; (assert (=> _a3 (= _v3 1)))
+;; (check-sat-assuming (_a1 _a2 _a3))
+;; sat
+;; (declare-const _a4 Bool)
+;; (assert (=> _a4 (and (or (not (= _v1 _v3))))))
+;; (check-sat-assuming (_a1 _a2 _a3 _a4))
+;; unsat
+
+(run 3 (q)
+     (fresh (a b c d e f)
+            (=/= (list a b c) (list d e f))
+
+            (z/ `(declare-const ,b Int))
+            (z/ `(declare-const ,e Int))
+            (z/assert `(< ,b 2))
+            (z/assert `(> ,b 0))
+            (z/assert `(= ,e 1))
+ 
+            (== a d)
+            (== c f)
+            ))
+;; ()
+
+(run 3 (q)
+     (fresh (a b c d e f)
+            (=/= (list a b c) (list d e f))
+
+            (z/ `(declare-const ,b Int))
+            (z/ `(declare-const ,e Int))
+            (z/assert `(< ,b 2))
+            (z/assert `(> ,b 0))
+            (z/assert `(= ,e 1))
+ 
+            (== a d)
+            
+            (== q `((,a ,b ,c) (,d ,e ,f)))
+            ))
+;; ((((_.0 1 _.1) (_.0 1 _.2)) (=/= ((_.1 _.2)))))
+
+;; Some normal tests for `=/=`
+(run 1 (q)
+     (fresh (x)
+            (=/= x 0)
+            (== q x)
+            ))
+;; ((_.0 (=/= ((_.0 0)))))
+
+(run 1 (q)
+     (fresh (x)
+            (=/= x 0)
+            (== x q)
+            ))
+;; ((_.0 (=/= ((_.0 0)))))
+
+(run 1 (q)
+     (fresh (x a b)
+            (=/= a b)
+            (== a `(,x 111 222))
+            (== b `(0 111 222))
+            (== q x)
+            ))
+;; ((_.0 (=/= ((_.0 0)))))
+
+(run 1 (q)
+     (fresh (x a b)
+            (=/= a b)
+            (== a `(,x 111 222))
+            (== b `(0 111 222))
+            (== x q)
+            ))
+;; ((_.0 (=/= ((_.0 0)))))
 
 

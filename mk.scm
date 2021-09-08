@@ -474,14 +474,15 @@
                   ((not S) st)
                   ((null? added) #f)
                   (else
-                   ; Choose one of the disequality elements (el) to attach
-                   ; the constraint to. Only need to choose one because
-                   ; all must fail to cause the constraint to fail.
-                   (let ((el (car added)))
-                     (let ((st (add-to-D st (car el) added)))
-                       (if (var? (cdr el))
-                           (add-to-D st (cdr el) added)
-                           st)))))))))
+                   ; Attach =/= constraint to all the disequality elements,
+                   ; because SMT 
+                   (foldl (lambda (el st)
+                            (let ((st (add-to-D st (car el) added)))
+                              (if (var? (cdr el))
+                                  (add-to-D st (cdr el) added)
+                                  st)))
+                          st added)
+                   ))))))
 
 (define =/=
   (lambda (u v)
