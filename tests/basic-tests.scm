@@ -200,17 +200,18 @@
    [(nevero)]))
 
 (run 1 (q)
-  (fresh (a b)
+     (fresh (a b)
 
-    (z/ `(declare-const ,a Int))
-    (z/assert `(= ,a 5))
+            (z/ `(declare-const ,a Int))
+            (z/assert `(= ,a 5))
 
-    (z/ `(declare-const ,b Int))
-    (z/assert `(= ,b 6))
+            (z/ `(declare-const ,b Int))
+            (z/assert `(= ,b 6))
 
-    (== a b)
-   
-    (nevero)))
+            (== a b)
+            
+            (nevero)))
+;; ()
 ;; (reset)
 ;; (declare-const _v1 Int)
 ;; (declare-const _a1 Bool)
@@ -226,3 +227,4 @@
 ;; (assert (=> _a3 (= _v1 _v2)))
 ;; (check-sat-assuming (_a1 _a2 _a3))
 ;; unsat
+
