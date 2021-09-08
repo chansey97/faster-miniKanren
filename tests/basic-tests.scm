@@ -334,3 +334,29 @@
 ;; (check-sat-assuming (_a1 _a2))
 ;; unsat
 
+(define (nevero)
+  (conde
+   [(== 1 2)]
+   [(nevero)]))
+
+(run 1 (q)
+     (fresh (a b c d)
+            (=/= (list a b) (list c d))
+            ; disequality constraint information is attached to `a` and `c` only
+            
+            (z/ `(declare-const ,a Int))
+            (z/ `(declare-const ,c Int))
+            (z/assert `(< ,a 2))
+            (z/assert `(> ,a 0))
+            (z/assert `(= ,c 1))
+            ; domain of `a` and `c` both restricted to the single value `1`, but miniKanren doesn't know that...
+            
+            (== b d)
+            ; should fail, but won't if disequality information is only on `a` and `c`.
+     
+            (nevero)
+            ))
+;; diverge
+;; idealy `(== b d)` should promote `(=/= a c)` to assert `(not (= a c))`
+`
+
