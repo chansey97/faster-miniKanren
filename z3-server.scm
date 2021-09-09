@@ -2,6 +2,7 @@
 (define z3-counter-get-model 0)
 
 (define log-all-calls #f)
+(define log-all-calls-with-file #t)
 
 (define-values (z3-out z3-in z3-err z3-p)
   (open-process-ports "z3 -in" 'block (native-transcoder)))
@@ -24,10 +25,11 @@
   (lambda ()
     (z3-check-in!)
     (let ([r (read z3-in)])
-      (let ((p^ (open-output-file "log.smt" 'append)))
-        (fprintf p^ "~a\n" r)
-        (flush-output-port p^)
-        (close-output-port p^))
+      (when log-all-calls-with-file
+        (let ((p^ (open-output-file "log.smt" 'append)))
+          (fprintf p^ "~a\n" r)
+          (flush-output-port p^)
+          (close-output-port p^)))
       (when log-all-calls (printf "read-sat: ~a\n" r))
       (if (eq? r 'sat)
           #t
@@ -41,8 +43,9 @@
                   (error 'read-sat (format "~a" r))))))))
 
 (define (init-log)
-  (let ((p (open-output-file "log.smt" 'replace)))
-    (close-output-port p)))
+  (when log-all-calls-with-file
+    (let ((p (open-output-file "log.smt" 'replace)))
+      (close-output-port p))))
 
 (define call-z3
   (lambda (xs)
@@ -54,11 +57,12 @@
       (let ([p (open-input-file "call-z3.smt")])
         (let ([xs^ (read p)])
           (close-input-port p)
-          (let ((p^ (open-output-file "log.smt" 'append)))
-            (for-each (lambda (x)
-                        (fprintf p^ "~a\n" x)) xs^)
-            (flush-output-port p^)
-            (close-output-port p^))
+          (when log-all-calls-with-file
+            (let ((p^ (open-output-file "log.smt" 'append)))
+              (for-each (lambda (x)
+                          (fprintf p^ "~a\n" x)) xs^)
+              (flush-output-port p^)
+              (close-output-port p^)))
           (for-each (lambda (x)
                       (when log-all-calls (printf "~a\n" x))
                       (fprintf z3-out "~a\n" x)) xs^)
@@ -76,17 +80,18 @@
 (define read-model
   (lambda ()
     (let ([m (read z3-in)])
-      (let ((p^ (open-output-file "log.smt" 'append)))
-        (if (equal? (car m) 'model)
-            (begin
-              (fprintf p^ "(\n")
-              (fprintf p^ "  model\n")
-              (for-each (lambda (x)
-                          (fprintf p^ "  ~a\n" x)) (cdr m))
-              (fprintf p^ ")\n"))
-            (fprintf p^ "~a\n" m))
-        (flush-output-port p^)
-        (close-output-port p^))
+      (when log-all-calls-with-file
+        (let ((p^ (open-output-file "log.smt" 'append)))
+          (if (equal? (car m) 'model)
+              (begin
+                (fprintf p^ "(\n")
+                (fprintf p^ "  model\n")
+                (for-each (lambda (x)
+                            (fprintf p^ "  ~a\n" x)) (cdr m))
+                (fprintf p^ ")\n"))
+              (fprintf p^ "~a\n" m))
+          (flush-output-port p^)
+          (close-output-port p^)))
       (when log-all-calls (printf "~a\n" m))
       (map (lambda (x)
              (let ((id (cadr x))
