@@ -218,7 +218,10 @@
            (numbero a1)
            (numbero a2)
            (numbero val)
-           (z/assert `(= ,val (,prim-id ,a1 ,a2))))]
+           (smt-typeo a1 'Int)
+           (smt-typeo a2 'Int)
+           (smt-typeo val 'Int)
+           (smt-asserto `(= ,val (,prim-id ,a1 ,a2))))]
    [(conde
      [(== prim-id '=)]
      [(== prim-id '>)]
@@ -232,9 +235,11 @@
            ;; (list-of-numbero a*)
            (numbero a1)
            (numbero a2)
+           (smt-typeo a1 'Int)
+           (smt-typeo a2 'Int)
            (conde
-            [(z/assert `(,prim-id ,a1 ,a2)) (== #t val)]
-            [(z/assert `(not (,prim-id ,a1 ,a2))) (== #f val)]))]    
+            [(smt-asserto `(,prim-id ,a1 ,a2)) (== #t val)]
+            [(smt-asserto `(not (,prim-id ,a1 ,a2))) (== #f val)]))]    
    ))
 
 (define (prim-expo expr env val)
