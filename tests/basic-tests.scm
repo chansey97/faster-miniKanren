@@ -424,7 +424,7 @@
       '(1 2.0))
 
 
-;; A problem of duplicate =/= promotion, it may affect performance.
+;; Fixed duplicate =/= promotion.
 (run 1 (q)
      (fresh (x y)
             (smt-typeo x 'Int)
@@ -438,12 +438,11 @@
 ;; (check-sat-assuming (_a1))
 ;; sat
 ;; (declare-const _a2 Bool)
-;; (assert (=> _a2 (and (or (not (= (as _v1 Int) 1)))))) ; <--- 
+;; (assert (=> _a2 (and (or (not (= (as _v1 Int) 1))))))
 ;; (check-sat-assuming (_a1 _a2))
 ;; sat
 ;; (declare-const _a3 Bool)
-;; (assert (=> _a3 (and (or (not (= (as _v1 Int) 2)))
-;;                      (or (not (= (as _v1 Int) 1)))))) ; <--- duplicate
+;; (assert (=> _a3 (and (or (not (= (as _v1 Int) 2))))))
 ;; (check-sat-assuming (_a1 _a2 _a3))
 ;; sat
 ;; (check-sat-assuming (_a1 _a2 _a3))

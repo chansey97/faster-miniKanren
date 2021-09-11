@@ -468,13 +468,10 @@
 (define numbero (type-constraint number? 'numbero))
 
 (define (add-to-D st v d)
-  (and st
-       (let* ((c (lookup-c v st))
-              (D^ (cons d (c-D c)))
-              (c^ (c-with-D c D^)))
-         (bind*
-          (set-c v c^ st)
-          (add-smt-disequality st D^)))))
+  (let* ((c (lookup-c v st))
+         (D^ (cons d (c-D c)))
+         (c^ (c-with-D c D^)))
+    (set-c v c^ st)))
 
 (define =/=*
   (lambda (S+)
@@ -486,14 +483,17 @@
                   ((not S) st)
                   ((null? added) #f)
                   (else
-                   ; Attach =/= constraint to all the disequality elements,
-                   ; because SMT 
-                   (foldl (lambda (el st)
-                            (let ((st (add-to-D st (car el) added)))
-                              (if (var? (cdr el))
-                                  (add-to-D st (cdr el) added)
-                                  st)))
-                          st added)
+                   (let ((st ((add-smt-disequality (list added)) st)))
+                     (if st
+                         ; Attach =/= constraint to all the disequality elements,
+                         ; Because these =/= constraints are potential SMT assertion.
+                         (foldl (lambda (el st)
+                                  (let ((st (add-to-D st (car el) added)))
+                                    (if (var? (cdr el))
+                                        (add-to-D st (cdr el) added)
+                                        st)))
+                                st added)
+                         #f))
                    ))))))
 
 (define =/=

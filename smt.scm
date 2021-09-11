@@ -204,7 +204,7 @@
                                               (z/assert `(= (as ,term ,smt-type) (as ,term ,smt-type)))
                                               (if (null? D) ; trigger delayed =/=, if (null? D)
                                                   (lambdag@ (st) st)
-                                                  (lambdag@ (st) ((add-smt-disequality st D) st)))
+                                                  (lambdag@ (st) ((add-smt-disequality D) st)))
                                               ))
                               ((eq? M smt-type) st)
                               (else #f)))
@@ -219,7 +219,7 @@
                                          (z/assert `(= (as ,term ,smt-type) (as ,term ,smt-type)))
                                          (if (null? D) ; trigger delayed =/=, if (null? D)
                                              (lambdag@ (st) st)
-                                             (lambdag@ (st) ((add-smt-disequality st D) st)))
+                                             (lambdag@ (st) ((add-smt-disequality D) st)))
                                          ))
                                  (else #f)  ; M = #f, and smt-type != Int or Real
                                  ))
@@ -266,20 +266,21 @@
               cs))
    D))
 
-(define (add-smt-disequality st D)
-  (let ((as (filter-smt-ok? st D)))
-    (if (not (null? as))
-        (smt-asserto/internal
-         `(and
-           ,@(map
-              (lambda (cs)
-                `(or
-                  ,@(map
-                     (lambda (ds)
-                       `(not (= ,(car ds) ,(cdr ds))))
-                     cs)))
-              as)))
-        (lambdag@ (st) st))))
+(define (add-smt-disequality D)
+  (lambdag@ (st)
+            (let ((as (filter-smt-ok? st D)))
+              (if (not (null? as))
+                  ((smt-asserto/internal
+                    `(and
+                      ,@(map
+                         (lambda (cs)
+                           `(or
+                             ,@(map
+                                (lambda (ds)
+                                  `(not (= ,(car ds) ,(cdr ds))))
+                                cs))) as))) st)
+                  st)
+              )))
 
 (define global-buffer '())
 (define z/global
