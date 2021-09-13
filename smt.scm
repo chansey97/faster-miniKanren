@@ -250,19 +250,28 @@
                    ((z/assert `(= (as ,v ,m) ,t) #t) st))))
             ))
 
-(define (smt-ok? st x)
-  (let ((x (walk* x (state-S st))))
-    (or (number? x)
-        (boolean? x)
-        (and (var? x)
-             (let ((c (lookup-c x st)))
-               (c-M c))))))
+(define (get-smt-type st x)
+  (cond
+    ((number? x) 'Int)
+    ((boolean? x) 'Bool)
+    ((var? x)
+     (let ((c (lookup-c x st)))
+       (c-M c)))
+    (else #f)))
+
+(define (smt-ok? st x y)
+  (let ((x (walk* x (state-S st)))
+        (y (walk* y (state-S st))))
+    (let ((x-type (get-smt-type st x))
+          (y-type (get-smt-type st y)))
+      (if (or (eq? x-type #f) (eq? y-type #f)) #f
+          (equal? x-type y-type)))))
 
 (define (filter-smt-ok? st D)
   (filter
    (lambda (cs)
      (for-all (lambda (ds)
-                (and (smt-ok? st (car ds)) (smt-ok? st (cdr ds))))
+                (smt-ok? st (car ds) (cdr ds)))
               cs))
    D))
 

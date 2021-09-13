@@ -466,6 +466,7 @@
             (smt-typeo x 'Int)
             (smt-typeo y 'Bool)
             (=/= x y)))
+;; (_.0)
 ;; (reset)
 ;; (declare-const _v1 Int)
 ;; (declare-const _a1 Bool)
@@ -477,11 +478,24 @@
 ;; (assert (=> _a2 (= (as _v2 Bool) (as _v2 Bool))))
 ;; (check-sat-assuming (_a1 _a2))
 ;; sat
+;; (check-sat-assuming (_a1 _a2))
+;; sat
+;; (get-model)
+;; (
+;;   model
+;;   (define-fun _a1 () Bool true)
+;;   (define-fun _a2 () Bool true)
+;;   (define-fun _v1 () Int 0)
+;;   (define-fun _v2 () Bool false)
+;; )
 ;; (declare-const _a3 Bool)
-;; (assert (=> _a3 (and (or (not (= (as _v1 Int) (as _v2 Bool)))))))
+;; (assert (=> _a3 (= (as _v1 Int) 0)))
 ;; (check-sat-assuming (_a1 _a2 _a3))
-;; (error line 11 column 59: Sorts Int and Bool are incompatible)
-
+;; sat
+;; (declare-const _a4 Bool)
+;; (assert (=> _a4 (= (as _v2 Bool) false)))
+;; (check-sat-assuming (_a1 _a2 _a3 _a4))
+;; sat
 
 
 
