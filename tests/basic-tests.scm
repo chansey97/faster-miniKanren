@@ -460,6 +460,30 @@
 ;; (check-sat-assuming (_a1 _a2 _a3 _a4))
 ;; sat
 
+;; A problem of incompatible SMT types, when promoting =/= to an SMT assertion.
+(run 1 (q)
+     (fresh (x y)
+            (smt-typeo x 'Int)
+            (smt-typeo y 'Bool)
+            (=/= x y)))
+;; (reset)
+;; (declare-const _v1 Int)
+;; (declare-const _a1 Bool)
+;; (assert (=> _a1 (= (as _v1 Int) (as _v1 Int))))
+;; (check-sat-assuming (_a1))
+;; sat
+;; (declare-const _v2 Bool)
+;; (declare-const _a2 Bool)
+;; (assert (=> _a2 (= (as _v2 Bool) (as _v2 Bool))))
+;; (check-sat-assuming (_a1 _a2))
+;; sat
+;; (declare-const _a3 Bool)
+;; (assert (=> _a3 (and (or (not (= (as _v1 Int) (as _v2 Bool)))))))
+;; (check-sat-assuming (_a1 _a2 _a3))
+;; (error line 11 column 59: Sorts Int and Bool are incompatible)
+
+
+
 
 ;; Tricky problem!
 ;; The smt-asserto can include arbitrary formulas, which may include incompatible types.
