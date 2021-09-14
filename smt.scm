@@ -17,30 +17,13 @@
              (eq? 'declare-const (car s)))
          )))
 
-(define filter-redundant-declare
-  (lambda (d es)
-    (filter (lambda (e) (not (equal? e d))) es)))
+(define remove-redundant-declares
+  (lambda (ds)
+    (remove-duplicates ds)))
 
-(define filter-redundant-declares
-  (lambda (ds es)
-    (if (null? ds)
-        es
-        (filter-redundant-declares
-         (cdr ds)
-         (cons (car ds) (filter-redundant-declare (car ds) es))))))
-
-(define redundant-declare^?
-  (lambda (d ds)
-    (if (null? ds)
-        #f
-        (let ((e  (car ds))
-              (es (cdr ds)))
-          (or (equal? d e)
-              (redundant-declare^? d es))))))
-
-(define filter-redundant-declares^
-  (lambda (ds ds^)
-    (remp (lambda (d) (redundant-declare^? d ds^)) ds)))
+(define remove-declares*
+  (lambda (ds^ ds)
+    (remove* ds^ ds)))
 
 (define decls '())
 (define undeclared?
@@ -96,7 +79,7 @@
                (ds-R (partition declares? M))
                (ds (car ds-R))
                (R (cdr ds-R))
-               (ds (filter-redundant-declares^ ds decls))
+               (ds (remove-declares* decls ds))
                (_ (set! decls (append ds decls)))
                ;; (dc (map (lambda (x) `(declare-const ,x Int))
                ;;          (filter undeclared? (map reify-v-name vs))))
@@ -326,7 +309,7 @@
                    (vs-decls (map (lambda (v/t) `(declare-const ,(reify-v-name (car v/t)) ,(cadr v/t))) vs))
                    (undeclared-rs (filter undeclared? vs-decls)))
               (let* ((undeclared-decls/rs (append undeclared-rs undeclared-decls))
-                     (undeclared-decls/rs (filter-redundant-declares undeclared-decls/rs undeclared-decls/rs))
+                     (undeclared-decls/rs (remove-redundant-declares undeclared-decls/rs))
                      (actual-lines (append undeclared-decls/rs undeclared-assumptions other-lines)))
                 (set! all-assumptions (append (map cadr undeclared-assumptions) all-assumptions))
                 (set! local-buffer (append local-buffer actual-lines))      

@@ -198,3 +198,8 @@
            (f (car seq) init)
            (cdr seq))))
 
+(define (remove* v-lst lst)
+  (define (exists-x x xs)
+    (exists (lambda (e) (equal? e x)) xs))
+  (remp (lambda (e) (exists-x e v-lst)) lst))
+
