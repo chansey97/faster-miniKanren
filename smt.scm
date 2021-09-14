@@ -26,7 +26,7 @@
     (remove* ds^ ds)))
 
 (define decls '())
-(define undeclared?
+(define undeclared?!
   (lambda (x)
     (let ((r (not (member x decls))))
       (when r
@@ -302,12 +302,12 @@
                                               (eq? (caddr x) 'Bool)))
                                        lines))
               (other-lines (filter (lambda (x) (not (declares? x))) lines)))
-          (let* ((undeclared-decls (filter (lambda (x) (undeclared? x)) new-decls))
-                 (undeclared-assumptions (filter (lambda (x) (undeclared? x)) new-assumptions)))
+          (let* ((undeclared-decls (filter (lambda (x) (undeclared?! x)) new-decls))
+                 (undeclared-assumptions (filter (lambda (x) (undeclared?! x)) new-assumptions)))
             (let* ((p (assq a relevant-vars))
                    (vs (cdr p))
                    (vs-decls (map (lambda (v/t) `(declare-const ,(reify-v-name (car v/t)) ,(cadr v/t))) vs))
-                   (undeclared-rs (filter undeclared? vs-decls)))
+                   (undeclared-rs (filter undeclared?! vs-decls)))
               (let* ((undeclared-decls/rs (append undeclared-rs undeclared-decls))
                      (undeclared-decls/rs (remove-redundant-declares undeclared-decls/rs))
                      (actual-lines (append undeclared-decls/rs undeclared-assumptions other-lines)))
