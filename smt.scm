@@ -80,15 +80,11 @@
                (ds (car ds-R))
                (R (cdr ds-R))
                (ds (remove-declares* decls ds))
-               (_ (set! decls (append ds decls)))
-               ;; (dc (map (lambda (x) `(declare-const ,x Int))
-               ;;          (filter undeclared? (map reify-v-name vs))))
-               (dc '()))
+               (_ (set! decls (append ds decls))))
           (list
            dd
            (append
             ds
-            dc
             R)
            vs))))))
 
@@ -381,19 +377,23 @@
   (lambda (e . args)
     (let ((no_walk? (and (not (null? args)) (car args))))
       (lambdag@ (st)
-                (let ((a1 (fresh-assumption)))
-                  (let ((a0 (last-assumption (state-M st))))
-                    (let ((rs (if (eq? a0 'true) '()  (cdr (assq a0 relevant-vars))))
-                          (as (if (eq? a0 'true) '() (assq a0 assumption-chains))))
-                      (set! relevant-vars (cons (cons a1 rs) relevant-vars))
-                      (set! assumption-chains (cons (cons a1 as) assumption-chains))
-                      (set! all-assumptions (cons a1 all-assumptions))
-                      (bind*
-                       st
-                       (z/check `((assert (=> ,a1 ,e))
-                                  (declare-const ,a1 Bool))
-                                a1
-                                no_walk?)))))))))
+                (let ((a0 (last-assumption (state-M st)))
+                      (a1 (fresh-assumption)))
+                  (let-values (((rs as) (if (eq? a0 'true)
+                                            (values '() '())
+                                            (values (cdr (assq a0 relevant-vars))
+                                                    (assq a0 assumption-chains)))))
+                    (set! relevant-vars (cons (cons a1 rs) relevant-vars))
+                    (set! assumption-chains (cons (cons a1 as) assumption-chains))
+                    (set! all-assumptions (cons a1 all-assumptions))
+                    (bind*
+                     st
+                     (z/check `((assert (=> ,a1 ,e))
+                                (declare-const ,a1 Bool))
+                              a1
+                              no_walk?)
+                     ))
+                  )))))
 
 (define relevant-vars '())
 (define assumption-chains '())
