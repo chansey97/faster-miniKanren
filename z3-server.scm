@@ -71,11 +71,6 @@
       )
     ))
 
-(define check-sat
-  (lambda (xs)
-    (call-z3 (append (cons '(reset) xs) '((check-sat))))
-    (set! z3-counter-check-sat (+ z3-counter-check-sat 1))
-    (read-sat)))
 
 (define read-model
   (lambda ()
@@ -115,10 +110,6 @@
     (set! z3-counter-get-model (+ z3-counter-get-model 1))
     (read-model)))
 
-(define get-model
-  (lambda (xs)
-    (and (check-sat xs)
-         (get-model-inc))))
 
 (define neg-model
   (lambda (model)
@@ -136,15 +127,3 @@
               )) model))))
     ))
 
-(define get-next-model
-  (lambda (xs ms)
-    (let* ([ms (map (lambda (m)
-                      (filter (lambda (x) ; ignoring functions
-                                (or (number? (cdr x))
-                                    (boolean? (cdr x))
-                                    (symbol? (cdr x)) ; for bitvectors
-                                    )) m))
-                    ms)])
-      (if (member '() ms) #f  ; if we're skipping a model, let us stop
-          (and (check-sat (append xs (map neg-model ms)))
-               (get-model-inc))))))
