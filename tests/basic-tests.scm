@@ -64,7 +64,7 @@
                   (smt-typeo out 'Int)
                   (add1o n out)
                   (== q `(,n ,out))))
-      '((0 1) (-1 0) (-2 -1) (-3 -2) (-4 -3)))
+      '((0 1) (1 2) (2 3) (3 4) (4 5)))
 
 (test ""
       (run 5 (q)
@@ -299,7 +299,7 @@
 (test "smt-typeo-0"
       (run 3 (q)
            (smt-typeo q 'Int))
-      '(0 1 2))
+      '(0 2 3))
 
 ;; ex1
 (test "smt-typeo-1"
