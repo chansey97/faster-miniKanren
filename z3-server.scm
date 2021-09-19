@@ -38,7 +38,8 @@
               (if (eq? r 'unknown)
                   (begin
                     (printf "read-sat: unknown\n")
-                    ;;(call-z3 '((pop)))
+                    ;; work around a bug of z3-4.8.7
+                    (z/gc!)
                     #f)
                   (error 'read-sat (format "~a" r))))))))
 
