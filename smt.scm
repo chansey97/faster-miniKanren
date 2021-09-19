@@ -367,7 +367,9 @@
 (define (fresh-assumption)
   (when (and (= (remainder assumption-count gc-assumption-threshold) 0)
              (> assumption-count 0))
-    (printf "gc z3...\n")
+    ;; silent z/gc! messages, when gc-assumption-threshold = 1
+    (when (> gc-assumption-threshold 1)
+      (printf "gc z3...\n"))
     (z/gc!))
   (set! assumption-count (+ assumption-count 1))
   (string->symbol ;(format #f "_a~d" assumption-count)
