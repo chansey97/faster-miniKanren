@@ -18,7 +18,7 @@
                   ))
       '(_.0))
 
-(test "==-and-smt:fix a bug when gc-assumption-threshold = 1"
+(test "==-and-smt: fix a bug when gc-assumption-threshold = 1"
       (run 3 (q)
            (conde
             ((fresh (x)
@@ -395,7 +395,7 @@
                   ))
       '())
 
-(test "(smt-typeo-12)"
+(test "smt-typeo-12"
       (run 3 (q)
            (fresh (a)
                   (numbero a)
