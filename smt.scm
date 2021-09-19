@@ -367,9 +367,6 @@
 (define (fresh-assumption)
   (when (and (= (remainder assumption-count gc-assumption-threshold) 0)
              (> assumption-count 0))
-    ;; silent z/gc! messages, when gc-assumption-threshold = 1
-    (when (> gc-assumption-threshold 1)
-      (printf "gc z3...\n"))
     (z/gc!))
   (set! assumption-count (+ assumption-count 1))
   (string->symbol ;(format #f "_a~d" assumption-count)
@@ -433,6 +430,9 @@
   (set! global-buffer '())
   (set! local-buffer '()))
 (define (z/gc!)
+  ;; silent z/gc! messages, when gc-assumption-threshold = 1
+  (when (> gc-assumption-threshold 1)
+    (printf "gc z3...\n"))
   (call-z3 '((reset)))
   (call-z3 global-buffer)
   (set! decls '())
