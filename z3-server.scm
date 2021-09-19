@@ -4,6 +4,8 @@
 (define log-all-calls #f)
 (define log-all-calls-with-file #t)
 
+(define z3-unknown-robust #t)
+
 (define-values (z3-out z3-in z3-err z3-p)
   (open-process-ports "z3 -in" 'block (native-transcoder)))
 (define (z3-reset!)
@@ -38,8 +40,7 @@
               (if (eq? r 'unknown)
                   (begin
                     (printf "read-sat: unknown\n")
-                    ;; work around a bug of z3-4.8.7
-                    (z/gc!)
+                    (when z3-unknown-robust (z/gc!))
                     #f)
                   (error 'read-sat (format "~a" r))))))))
 
