@@ -18,6 +18,18 @@
                   ))
       '(_.0))
 
+;; Crash when gc-assumption-threshold = 1
+(run 3 (q)
+     (conde
+      ((fresh (x)
+              (smt-typeo x 'Int)
+              (smt-asserto `(= ,x 1))))
+      ((fresh (x)
+              (smt-typeo x 'Int)
+              (smt-asserto `(= ,x 2))))
+      ))
+;; Exception in cdr: #f is not a pair
+
 (test "==-and-smt: duplicate declare in conde"
       (run 3 (q)
            (conde
