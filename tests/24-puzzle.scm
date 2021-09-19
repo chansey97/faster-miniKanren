@@ -68,6 +68,32 @@
       '((2 (2 10 10))
         (10 (2 2 10))))
 
+;; Fail when gc-assumption-threshold = 1000
 (test "24-puzzle-a"
       (run 1 (e) (puzzleo e '(1 1 1 8) 24 '()))
       '((* 8 (+ 1 (+ 1 1)))))
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; read-sat: unknown
+;; Failed: (run 1 (e) (puzzleo e '(1 1 1 8) 24 '()))
+;; Expected: ((* 8 (+ 1 (+ 1 1))))
+;; Computed: ()
