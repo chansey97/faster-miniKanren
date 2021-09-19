@@ -1,10 +1,17 @@
 (define z3-counter-check-sat 0)
 (define z3-counter-get-model 0)
 
+;; (define log-all-calls #t)
 (define log-all-calls #f)
+
 (define log-all-calls-with-file #t)
+;; (define log-all-calls-with-file #f)
 
 (define z3-unknown-robust #t)
+;; (define z3-unknown-robust #f)
+
+(define z3-version 'z3-4.8.7)
+;; (define z3-version 'z3-4.8.12)
 
 (define-values (z3-out z3-in z3-err z3-p)
   (open-process-ports "z3 -in" 'block (native-transcoder)))
@@ -79,14 +86,22 @@
     (let ([m (read z3-in)])
       (when log-all-calls-with-file
         (let ((p^ (open-output-file "log.smt" 'append)))
-          (if (equal? (car m) 'model)
-              (begin
-                (fprintf p^ "(\n")
-                (fprintf p^ "  model\n")
-                (for-each (lambda (x)
-                            (fprintf p^ "  ~a\n" x)) (cdr m))
-                (fprintf p^ ")\n"))
-              (fprintf p^ "~a\n" m))
+          (if (eq? z3-version 'z3-4.8.12)
+              (if (pair? m)
+                  (begin
+                    (fprintf p^ "(\n")
+                    (for-each (lambda (x)
+                                (fprintf p^ "  ~a\n" x)) m)
+                    (fprintf p^ ")\n"))
+                  (fprintf p^ "~a\n" m))
+              (if (equal? (car m) 'model)
+                  (begin
+                    (fprintf p^ "(\n")
+                    (fprintf p^ "  model\n")
+                    (for-each (lambda (x)
+                                (fprintf p^ "  ~a\n" x)) (cdr m))
+                    (fprintf p^ ")\n"))
+                  (fprintf p^ "~a\n" m)))
           (flush-output-port p^)
           (close-output-port p^)))
       (when log-all-calls (printf "~a\n" m))
@@ -95,16 +110,26 @@
                    (params (caddr x))
                    (type (cadddr x))
                    (val (car (cddddr x)) ))
-               (cond
-                 ((null? params)
-                  (let ((val (cond
-                               ((eq? val 'false) #f)
-                               ((eq? val 'true) #t)
-                               (else (eval val)))))
-                    (list id val type)))
-                 (else (error 'read-model "doesn't support functions params" params)))
+               (let ((val (cond
+                            ((eq? val 'false) #f)
+                            ((eq? val 'true) #t)
+                            (else (eval val)))))
+                 (list id val type))
                ))
-           (cdr m)))))
+           (filter (lambda (x)
+                     ;; We currently don't support functions, so we shouldn't get a model which includes functions 
+                     ;; NOTE: z3-4.8.12 will return functions, even if we don't use functions.                     
+                     (let ((params (caddr x)))
+                       (cond
+                         ((null? params) #t)
+                         (else
+                          (if (eq? z3-version 'z3-4.8.12)
+                              #f
+                              (error 'read-model "doesn't support functions params" params))))))
+                   (if (eq? z3-version 'z3-4.8.12)
+                       m
+                       (cdr m)))
+           ))))
 
 (define get-model-inc
   (lambda ()
