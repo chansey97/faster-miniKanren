@@ -4,14 +4,14 @@
 ;; (define log-all-calls #t)
 (define log-all-calls #f)
 
-(define log-all-calls-with-file #t)
-;; (define log-all-calls-with-file #f)
+;; (define log-all-calls-with-file #t)
+(define log-all-calls-with-file #f)
 
-(define z3-unknown-robust #t)
-;; (define z3-unknown-robust #f)
+;; (define z3-unknown-robust #t)
+(define z3-unknown-robust #f)
 
-(define z3-version 'z3-4.8.7)
-;; (define z3-version 'z3-4.8.12)
+;; (define z3-version 'z3-4.8.7)
+(define z3-version 'z3-4.8.12)
 
 (define-values (z3-out z3-in z3-err z3-p)
   (open-process-ports "z3 -in" 'block (native-transcoder)))
