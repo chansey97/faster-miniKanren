@@ -1,3 +1,9 @@
+;; (define gc-assumption-threshold 10000000)
+(define gc-assumption-threshold 1000) ; original
+;; (define gc-assumption-threshold 250)
+;; (define gc-assumption-threshold 100)
+;; (define gc-assumption-threshold 1)
+
 (define partition
   (lambda (p xs)
     (cons (filter p xs)
@@ -344,7 +350,7 @@
 
 (define assumption-count 0)
 (define (fresh-assumption)
-  (when (and (= (remainder assumption-count 1000) 0)
+  (when (and (= (remainder assumption-count gc-assumption-threshold) 0)
              (> assumption-count 0))
     (printf "gc z3...\n")
     (z/gc!))
