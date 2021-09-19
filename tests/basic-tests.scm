@@ -30,8 +30,7 @@
             ))
       '(_.0 _.0))
 
-;; Crash when gc-assumption-threshold = 1
-(test "==-and-smt: duplicate declare in conde"
+(test "==-and-smt: duplicate declare in conde, and fix a bug when gc-assumption-threshold = 1"
       (run 3 (q)
            (conde
             ((smt-typeo q 'Int)
@@ -40,44 +39,6 @@
              (smt-asserto `(= ,q 2)))
             ))
       '(1 2))
-;; (reset)
-;; (declare-const _v0 Int)
-;; (declare-const _a1 Bool)
-;; (assert (=> _a1 (= (as _v0 Int) (as _v0 Int))))
-;; (check-sat-assuming (_a1))
-;; sat
-;; (reset)
-;; (declare-const _v0 Int)
-;; (declare-const _a1 Bool)
-;; (assert (=> _a1 (= (as _v0 Int) (as _v0 Int))))
-;; (declare-const _a2 Bool)
-;; (assert (=> _a2 (= (as _v0 Int) 1)))
-;; (check-sat-assuming (_a2 _a1))
-;; sat
-;; (check-sat-assuming (_a2 _a1))
-;; sat
-;; (get-model)
-;; (
-;;   model
-;;   (define-fun _v0 () Int 1)
-;;   (define-fun _a1 () Bool true)
-;;   (define-fun _a2 () Bool true)
-;; )
-;; (reset)
-;; (declare-const _v0 Int)
-;; (declare-const _a1 Bool)
-;; (declare-const _a2 Bool)
-;; (assert (=> _a1 (= (as _v0 Int) (as _v0 Int))))
-;; (assert (=> _a2 (= (as _v0 Int) 1)))
-;; (declare-const _a3 Bool)
-;; (assert (=> _a3 (= (as _v0 Int) 1)))
-;; (check-sat-assuming (_a3 _a2 _a1))
-;; sat
-;; (reset)
-;; (declare-const _a4 Bool)
-;; (assert (=> _a4 (= (as _v0 Int) (as _v0 Int))))
-;; (check-sat-assuming (_a4))
-;; (error line 26 column 32: unknown constant _v0)
 
 (test "boolean"
       (run 1 (q)

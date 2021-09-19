@@ -84,14 +84,11 @@
                (M (cdr dd-M))
                (ds-R (partition declares? M))
                (ds (car ds-R))
-               (R (cdr ds-R))
-               (ds (remove-declares* decls ds))
-               (_ (set! decls (append ds decls))))
+               (R (cdr ds-R)))
           (list
            dd
-           (append
-            ds
-            R)
+           ds
+           R
            vs))))))
 
 (define (get-assumptions a)
@@ -283,13 +280,26 @@
     (set! global-buffer (append global-buffer lines))))
 (define local-buffer '())
 (define z/local
-  (lambda (lines)
+  (lambda (ds R)
     (lambdag@ (st)
-              (begin
-                (set! local-buffer (append local-buffer lines))
-                (call-z3 lines)
-                (let ((M (append (reverse lines) (state-M st))))
-                  (state-with-M st M))))))
+              (bind*
+               st
+               (lambda (st)
+                 ;; set the branch M
+                 ;; FIXME: is it possible there is duplicate declare already in the branch M? 
+                 (let* ((lines (append ds R))
+                        (M (append (reverse lines) (state-M st))))
+                   (state-with-M st M)))
+               (lambda (st)
+                 ;; call z3
+                 ;; If decls already has declares in ds, remove the declares in ds
+                 (let ((ds (remove-declares* decls ds)))
+                   (set! decls (append ds decls))
+                   (let* ((lines (append ds R)))
+                     (set! local-buffer (append local-buffer lines))
+                     (call-z3 lines)
+                     st)
+                   ))))))
 (define (replay-if-needed a m)
   (let ((r (filter (lambda (x) (not (member x local-buffer))) m)))
     (unless (null? r)
@@ -328,12 +338,13 @@
               (replay-if-needed (last-assumption (state-M st)) (state-M st))
               (let ((r (wrap-neg ((z/reify-SM m no_walk?) st))))
                 (let ((dd (car r))
-                      (ds+R (cadr r))
-                      (vs (caddr r)))
+                      (ds (cadr r))
+                      (R (caddr r))
+                      (vs (cadddr r)))
                   (z/global dd)
                   (bind*
                    st
-                   (z/local ds+R)
+                   (z/local ds R)
                    (lambdag@ (st)
                              (if (and a (check-sat-assuming a (state-M st)))
                                  (begin
