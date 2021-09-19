@@ -423,100 +423,19 @@
             ))
       '(1 2.0))
 
+(test "=/=-promotion-1"
+      (run 1 (q)
+           (fresh (x y)
+                  (smt-typeo x 'Int)
+                  (=/= x 1)
+                  (=/= x 2)
+                  ))
+      '(_.0))
 
-;; Fixed duplicate =/= promotion.
-(run 1 (q)
-     (fresh (x y)
-            (smt-typeo x 'Int)
-            (=/= x 1)
-            (=/= x 2)
-            ))
-;; (reset)
-;; (declare-const _v1 Int)
-;; (declare-const _a1 Bool)
-;; (assert (=> _a1 (= (as _v1 Int) (as _v1 Int))))
-;; (check-sat-assuming (_a1))
-;; sat
-;; (declare-const _a2 Bool)
-;; (assert (=> _a2 (and (or (not (= (as _v1 Int) 1))))))
-;; (check-sat-assuming (_a1 _a2))
-;; sat
-;; (declare-const _a3 Bool)
-;; (assert (=> _a3 (and (or (not (= (as _v1 Int) 2))))))
-;; (check-sat-assuming (_a1 _a2 _a3))
-;; sat
-;; (check-sat-assuming (_a1 _a2 _a3))
-;; sat
-;; (get-model)
-;; (
-;;   model
-;;   (define-fun _a3 () Bool true)
-;;   (define-fun _v1 () Int 0)
-;;   (define-fun _a1 () Bool true)
-;;   (define-fun _a2 () Bool true)
-;; )
-;; (declare-const _a4 Bool)
-;; (assert (=> _a4 (= (as _v1 Int) 0)))
-;; (check-sat-assuming (_a1 _a2 _a3 _a4))
-;; sat
-
-;; A problem of incompatible SMT types, when promoting =/= to an SMT assertion.
-(run 1 (q)
-     (fresh (x y)
-            (smt-typeo x 'Int)
-            (smt-typeo y 'Bool)
-            (=/= x y)))
-;; (_.0)
-;; (reset)
-;; (declare-const _v1 Int)
-;; (declare-const _a1 Bool)
-;; (assert (=> _a1 (= (as _v1 Int) (as _v1 Int))))
-;; (check-sat-assuming (_a1))
-;; sat
-;; (declare-const _v2 Bool)
-;; (declare-const _a2 Bool)
-;; (assert (=> _a2 (= (as _v2 Bool) (as _v2 Bool))))
-;; (check-sat-assuming (_a1 _a2))
-;; sat
-;; (check-sat-assuming (_a1 _a2))
-;; sat
-;; (get-model)
-;; (
-;;   model
-;;   (define-fun _a1 () Bool true)
-;;   (define-fun _a2 () Bool true)
-;;   (define-fun _v1 () Int 0)
-;;   (define-fun _v2 () Bool false)
-;; )
-;; (declare-const _a3 Bool)
-;; (assert (=> _a3 (= (as _v1 Int) 0)))
-;; (check-sat-assuming (_a1 _a2 _a3))
-;; sat
-;; (declare-const _a4 Bool)
-;; (assert (=> _a4 (= (as _v2 Bool) false)))
-;; (check-sat-assuming (_a1 _a2 _a3 _a4))
-;; sat
-
-
-
-;; Tricky problem!
-;; The smt-asserto can include arbitrary formulas, which may include incompatible types.
-;; Should we do type-check in miniKanren or just use error messages from SMT solver?
-;; Or even just report this error?
-;; (run 1 (q)
-;;      (fresh (a b)
-;;             (== a b)
-;;             (smt-typeo a 'Int)
-;;             (smt-asserto `(= ,a #f))
-;;             (== q `(,a ,b))))
-;; (reset)
-;; (declare-const _v112 Int)
-;; (declare-const _a1 Bool)
-;; (assert (=> _a1 (= (as _v112 Int) (as _v112 Int))))
-;; (check-sat-assuming (_a1))
-;; sat
-;; (declare-const _a2 Bool)
-;; (assert (=> _a2 (= (as _v112 Int) false)))
-;; (check-sat-assuming (_a1 _a2))
-;; (error line 676 column 39: Sorts Int and Bool are incompatible)
-
+(test "=/=-promotion-2"
+      (run 1 (q)
+           (fresh (x y)
+                  (smt-typeo x 'Int)
+                  (smt-typeo y 'Bool)
+                  (=/= x y)))
+      '(_.0))
