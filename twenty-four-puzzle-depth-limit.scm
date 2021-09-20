@@ -1,5 +1,7 @@
+(load "mk-vicare.scm")
 (load "mk.scm")
-(load "z3-driver.scm")
+(load "smt.scm")
+(load "z3-server.scm")
 (load "test-check.scm")
 
 ;;; Classic 24 math puzzle, as described at:
@@ -19,7 +21,7 @@
 ;;; do *not* work!
 
 #|
-;;; Original defn of remove-one-elemento, using (== x a) rather than (z/assert `(= ,x ,a)).
+;;; Original defn of remove-one-elemento, using (== x a) rather than (smt-asserto `(= ,x ,a)).
 ;;; Which version is preferable?
 ;;; What are the tradeoffs?
 
@@ -43,50 +45,71 @@
     (fresh (a d)
            (== `(,a . ,d) ls)
            (numbero a)
+           (smt-typeo a 'Int)
+           (smt-typeo x 'Int)
            (conde
-            ((z/assert `(= ,a ,x))
+            ((smt-asserto `(= ,a ,x))
              (== d out))
-            ((z/assert `(< ,a ,x))
+            ((smt-asserto `(< ,a ,x))
              (fresh (res)
                     (== `(,a . ,res) out)
                     (remove-one-elemento x d res)))))))
 
 (define puzzleo
   (lambda (expr num* max-ops val num*^ max-ops^)
-    (conde
-     
-     [(numbero expr)
-      ;; Originally used (== expr val).
-      ;; Which version is preferable?
-      ;; What are the tradeoffs?
-      (z/assert `(and (= ,expr ,val) (= ,max-ops ,max-ops^)))
-      (remove-one-elemento expr num* num*^)]
+    (fresh ()
+           (smt-typeo val 'Int)
+           (smt-typeo max-ops 'Int)
+           (smt-typeo max-ops^ 'Int)
+           
+           (conde
+            
+            [(numbero expr)
+             (smt-typeo expr 'Int)
+             ;; Originally used (== expr val).
+             ;; Which version is preferable?
+             ;; What are the tradeoffs?
+             (smt-asserto `(and (= ,expr ,val) (= ,max-ops ,max-ops^)))
+             (remove-one-elemento expr num* num*^)]
 
-     [(fresh (a1 a2 n1 n2 num*^^ max-ops-1 max-ops^^)
-             (== `(+ ,a1 ,a2) expr)
-             (z/assert `(and (= ,val (+ ,n1 ,n2)) (< 0 ,max-ops) (= (- ,max-ops 1) ,max-ops-1)))
-             (puzzleo a1 num* max-ops-1 n1 num*^^ max-ops^^)
-             (puzzleo a2 num*^^ max-ops^^ n2 num*^ max-ops^))]
+            [(fresh (a1 a2 n1 n2 num*^^ max-ops-1 max-ops^^)
+                    (smt-typeo n1 'Int)
+                    (smt-typeo n2 'Int)
+                    (smt-typeo max-ops-1 'Int)
+                    (== `(+ ,a1 ,a2) expr)
+                    (smt-asserto `(and (= ,val (+ ,n1 ,n2)) (< 0 ,max-ops) (= (- ,max-ops 1) ,max-ops-1)))
+                    (puzzleo a1 num* max-ops-1 n1 num*^^ max-ops^^)
+                    (puzzleo a2 num*^^ max-ops^^ n2 num*^ max-ops^))]
 
-     [(fresh (a1 a2 n1 n2 num*^^ max-ops-1 max-ops^^)
-             (== `(- ,a1 ,a2) expr)
-             (z/assert `(and (= ,val (- ,n1 ,n2)) (< 0 ,max-ops) (= (- ,max-ops 1) ,max-ops-1)))
-             (puzzleo a1 num* max-ops-1 n1 num*^^ max-ops^^)
-             (puzzleo a2 num*^^ max-ops^^ n2 num*^ max-ops^))]
+            [(fresh (a1 a2 n1 n2 num*^^ max-ops-1 max-ops^^)
+                    (smt-typeo n1 'Int)
+                    (smt-typeo n2 'Int)
+                    (smt-typeo max-ops-1 'Int)
+                    (== `(- ,a1 ,a2) expr)
+                    (smt-asserto `(and (= ,val (- ,n1 ,n2)) (< 0 ,max-ops) (= (- ,max-ops 1) ,max-ops-1)))
+                    (puzzleo a1 num* max-ops-1 n1 num*^^ max-ops^^)
+                    (puzzleo a2 num*^^ max-ops^^ n2 num*^ max-ops^))]
 
-     [(fresh (a1 a2 n1 n2 num*^^ max-ops-1 max-ops^^)
-             (== `(* ,a1 ,a2) expr)
-             (z/assert `(and (= ,val (* ,n1 ,n2)) (< 0 ,max-ops) (= (- ,max-ops 1) ,max-ops-1)))
-             (puzzleo a1 num* max-ops-1 n1 num*^^ max-ops^^)
-             (puzzleo a2 num*^^ max-ops^^ n2 num*^ max-ops^))]
+            [(fresh (a1 a2 n1 n2 num*^^ max-ops-1 max-ops^^)
+                    (smt-typeo n1 'Int)
+                    (smt-typeo n2 'Int)
+                    (smt-typeo max-ops-1 'Int)
+                    (== `(* ,a1 ,a2) expr)
+                    (smt-asserto `(and (= ,val (* ,n1 ,n2)) (< 0 ,max-ops) (= (- ,max-ops 1) ,max-ops-1)))
+                    (puzzleo a1 num* max-ops-1 n1 num*^^ max-ops^^)
+                    (puzzleo a2 num*^^ max-ops^^ n2 num*^ max-ops^))]
 
-     [(fresh (a1 a2 n1 n2 num*^^ max-ops-1 max-ops^^)
-             (== `(/ ,a1 ,a2) expr)
-             (z/assert `(and (< 0 ,max-ops) (= (- ,max-ops 1) ,max-ops-1) (not (= ,n2 0)) (= ,val (div ,n1 ,n2))))
-             (puzzleo a1 num* max-ops-1 n1 num*^^ max-ops^^)
-             (puzzleo a2 num*^^ max-ops^^ n2 num*^ max-ops^))]
-     
-     )))
+            [(fresh (a1 a2 n1 n2 num*^^ max-ops-1 max-ops^^)
+                    (smt-typeo n1 'Int)
+                    (smt-typeo n2 'Int)
+                    (smt-typeo max-ops-1 'Int)
+                    (== `(/ ,a1 ,a2) expr)
+                    (smt-asserto `(and (< 0 ,max-ops) (= (- ,max-ops 1) ,max-ops-1) (not (= ,n2 0)) (= ,val (div ,n1 ,n2))))
+                    (puzzleo a1 num* max-ops-1 n1 num*^^ max-ops^^)
+                    (puzzleo a2 num*^^ max-ops^^ n2 num*^ max-ops^))]
+            
+            ))
+    ))
 
 (test "remove-one-elemento-a"
       (run* (q)
@@ -183,10 +206,14 @@
 (test "24-puzzle-c"
       (run 20 (e)
            (fresh (num* n1 n2 n3 n4)
-                  (z/assert `(< 1 ,n1))
-                  (z/assert `(< 1 ,n2))
-                  (z/assert `(< 1 ,n3))
-                  (z/assert `(< 1 ,n4))
+                  (smt-typeo n1 'Int)
+                  (smt-typeo n2 'Int)
+                  (smt-typeo n3 'Int)
+                  (smt-typeo n4 'Int)
+                  (smt-asserto `(< 1 ,n1))
+                  (smt-asserto `(< 1 ,n2))
+                  (smt-asserto `(< 1 ,n3))
+                  (smt-asserto `(< 1 ,n4))
                   (== `(,n1 ,n2 ,n3 ,n4) num*)
                   (puzzleo e num* 24 '())))
       '((+ 18 (+ 2 (+ 2 2)))
@@ -213,10 +240,14 @@
 (test "24-puzzle-d"
       (run 10 (e)
            (fresh (num* n1 n2 n3 n4 op1 op2 op3 e1 e2 e3 e4)
-                  (z/assert `(< 0 ,n1))
-                  (z/assert `(< 0 ,n2))
-                  (z/assert `(< 0 ,n3))
-                  (z/assert `(< 0 ,n4))
+                  (smt-typeo n1 'Int)
+                  (smt-typeo n2 'Int)
+                  (smt-typeo n3 'Int)
+                  (smt-typeo n4 'Int)
+                  (smt-asserto `(< 0 ,n1))
+                  (smt-asserto `(< 0 ,n2))
+                  (smt-asserto `(< 0 ,n3))
+                  (smt-asserto `(< 0 ,n4))
                   (== `(,n1 ,n2 ,n3 ,n4) num*)
                   (== `(,op1 (,op2 ,e1 ,e2) (,op3 ,e3 ,e4)) e)
                   (puzzleo e num* 24 '())))
@@ -234,10 +265,14 @@
 (test "24-puzzle-e"
       (run 10 (e)
            (fresh (num* n1 n2 n3 n4 op e1 e2)
-                  (z/assert `(< 0 ,n1))
-                  (z/assert `(< 0 ,n2))
-                  (z/assert `(< 0 ,n3))
-                  (z/assert `(< 0 ,n4))
+                  (smt-typeo n1 'Int)
+                  (smt-typeo n2 'Int)
+                  (smt-typeo n3 'Int)
+                  (smt-typeo n4 'Int)
+                  (smt-asserto `(< 0 ,n1))
+                  (smt-asserto `(< 0 ,n2))
+                  (smt-asserto `(< 0 ,n3))
+                  (smt-asserto `(< 0 ,n4))
                   (== `(,n1 ,n2 ,n3 ,n4) num*)
                   (=/= op '+)
                   (== `(,op ,e1 ,e2) e)
@@ -256,10 +291,14 @@
 (test "24-puzzle-f"
       (run 10 (e)
            (fresh (num* n1 n2 n3 n4 op e1 e2)
-                  (z/assert `(< 0 ,n1))
-                  (z/assert `(< 0 ,n2))
-                  (z/assert `(< 0 ,n3))
-                  (z/assert `(< 0 ,n4))
+                  (smt-typeo n1 'Int)
+                  (smt-typeo n2 'Int)
+                  (smt-typeo n3 'Int)
+                  (smt-typeo n4 'Int)
+                  (smt-asserto `(< 0 ,n1))
+                  (smt-asserto `(< 0 ,n2))
+                  (smt-asserto `(< 0 ,n3))
+                  (smt-asserto `(< 0 ,n4))
                   (== `(,n1 ,n2 ,n3 ,n4) num*)
                   (== op '*)
                   (== `(,op ,e1 ,e2) e)
