@@ -1,7 +1,7 @@
 ;; (define gc-assumption-threshold 10000000)
 ;; (define gc-assumption-threshold 1000) ; original
-(define gc-assumption-threshold 250)
-;; (define gc-assumption-threshold 100)
+;; (define gc-assumption-threshold 250)
+(define gc-assumption-threshold 100)
 ;; (define gc-assumption-threshold 1)
 
 (define partition
