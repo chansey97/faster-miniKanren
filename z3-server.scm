@@ -56,28 +56,30 @@
     (let ((p (open-output-file "log.smt" 'replace)))
       (close-output-port p))))
 
+;; TODO: Support other types, e.g. Bitvector, etc.
+;; May using string instead of symbol.
+(define scheme->smt
+  (lambda (e)
+    (cond
+      ((pair? e) (cons (scheme->smt (car e)) (scheme->smt (cdr e))))
+      ((eq? e #t) 'true)
+      ((eq? e #f) 'false)
+      (else e))))
+
 (define call-z3
   (lambda (xs)
-    (when log-all-calls (printf "call-z3 enter\n"))
-    (let ([p (open-output-file "call-z3.smt" 'replace)])
-      (fprintf p "~a\n" xs)
-      (close-output-port p)
-      (system "perl -i -pe 's/#t/true/g; s/#f/false/g; s/bitvec-/#b/g' call-z3.smt")
-      (let ([p (open-input-file "call-z3.smt")])
-        (let ([xs^ (read p)])
-          (close-input-port p)
-          (when log-all-calls-with-file
-            (let ((p^ (open-output-file "log.smt" 'append)))
-              (for-each (lambda (x)
-                          (fprintf p^ "~a\n" x)) xs^)
-              (flush-output-port p^)
-              (close-output-port p^)))
+    (when log-all-calls (printf "call-z3 enter: xs = ~a\n" xs))
+    (let ((xs (scheme->smt xs)))
+      (when log-all-calls-with-file
+        (let ((p^ (open-output-file "log.smt" 'append)))
           (for-each (lambda (x)
-                      (when log-all-calls (printf "~a\n" x))
-                      (fprintf z3-out "~a\n" x)) xs^)
-          (flush-output-port z3-out)
-          ))
-      )
+                      (fprintf p^ "~a\n" x)) xs)
+          (flush-output-port p^)
+          (close-output-port p^)))
+      (for-each (lambda (x)
+                  (when log-all-calls (printf "~a\n" x))
+                  (fprintf z3-out "~a\n" x)) xs)
+      (flush-output-port z3-out))
     ))
 
 
