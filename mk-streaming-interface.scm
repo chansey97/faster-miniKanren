@@ -6,18 +6,26 @@
 
 (define-syntax streaming-run
   (syntax-rules ()
-    ((_ n (x) g0 g ...)
-     (streaming-take n 0 (time-second (current-time))
-                     (lambdaf@ ()
-                               ((fresh (x) g0 g ... purge-M-inc-models
-                                       (lambdag@ (final-c)
-                                                 (let ((z ((reify x) final-c)))
-                                                   (choice z empty-f))))
-                                empty-c))))))
+    ((_ n (q) g0 g ...)
+     (begin
+       (z/reset!)
+       (streaming-take n 0 (time-second (current-time))
+                       (inc
+                        ((fresh (q) g0 g ... z/purge
+                                (lambdag@ (st)
+                                          (let ((st (state-with-scope st nonlocal-scope)))
+                                            (let ((z ((reify q) st)))
+                                              (choice z (lambda () (lambda () #f)))))))
+                         empty-state)))))
+    ((_ n (q0 q1 q ...) g0 g ...)
+     (streaming-run n (x)
+          (fresh (q0 q1 q ...)
+                 g0 g ...
+                 (== `(,q0 ,q1 ,q ...) x))))))
 
 (define-syntax streaming-run*
   (syntax-rules ()
-    ((_ (x) g ...) (streaming-run #f (x) g ...))))
+    ((_ (q0 q ...) g0 g ...) (streaming-run #f (q0 q ...) g0 g ...))))
 
 (define streaming-take
   (lambda (n answer-count start-time f)
