@@ -2,7 +2,8 @@
 ;; (define gc-assumption-threshold 1000) ; original
 ;; (define gc-assumption-threshold 250)
 ;; (define gc-assumption-threshold 100)
-(define gc-assumption-threshold 1)
+(define gc-assumption-threshold 50)
+;; (define gc-assumption-threshold 1)
 
 (define partition
   (lambda (p xs)
