@@ -14,7 +14,7 @@
 (define z3-version 'z3-4.8.12)
 
 (define-values (z3-out z3-in z3-err z3-p)
-  (open-process-ports "z3 -in" 'block (native-transcoder)))
+  (open-process-ports "z3 -in smt.random_seed=1" 'block (native-transcoder)))
 (define (z3-reset!)
   (let-values (((out in err p)
                 (open-process-ports "z3 -in" 'block (native-transcoder))))

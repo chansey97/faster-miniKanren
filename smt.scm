@@ -2,7 +2,8 @@
 ;; (define gc-assumption-threshold 1000) ; original
 ;; (define gc-assumption-threshold 250)
 ;; (define gc-assumption-threshold 100)
-(define gc-assumption-threshold 50)
+;; (define gc-assumption-threshold 50)
+(define gc-assumption-threshold 25)
 ;; (define gc-assumption-threshold 1)
 
 (define partition
@@ -432,7 +433,7 @@
   (set! local-buffer '()))
 (define (z/gc!)
   ;; silent z/gc! messages, when gc-assumption-threshold = 1
-  (when (> gc-assumption-threshold 1)
+  (when (> gc-assumption-threshold 25)
     (printf "gc z3...\n"))
   (call-z3 '((reset)))
   (call-z3 global-buffer)
