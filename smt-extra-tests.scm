@@ -1,9 +1,4 @@
-(load "logging.scm")
-(load "mk-vicare.scm")
-(load "mk.scm")
-(load "smt.scm")
-(load "z3-server.scm")
-(load "test-check.scm")
+(load "require.scm")
 
 (test "conde"
       (run 3 (q)

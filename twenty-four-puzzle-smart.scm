@@ -1,10 +1,4 @@
-(load "logging.scm")
-(load "mk-vicare.scm")
-(load "mk.scm")
-(load "mk-streaming-interface.scm")
-(load "smt.scm")
-(load "z3-server.scm")
-(load "test-check.scm")
+(load "require.scm")
 
 ;;; Classic 24 math puzzle, as described at:
 ;;;
