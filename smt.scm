@@ -321,8 +321,7 @@
                  (undeclared-rs
                   (if (eq? a 'true)
                       '()
-                      (let* (#;(_ (debug-printf "replay-if-needed a=~a relevant-vars=~a\n" a relevant-vars))
-                             (p (assq a relevant-vars))
+                      (let* ((p (assq a relevant-vars))
                              (vs (cdr p))
                              (vs-decls (map (lambda (v/t) `(declare-const ,(reify-v-name (car v/t)) ,(cadr v/t))) vs)))
                         (filter undeclared?! vs-decls)))))
@@ -432,9 +431,7 @@
   (set! global-buffer '())
   (set! local-buffer '()))
 (define (z/gc!)
-  ;; silent z/gc! messages, when gc-assumption-threshold = 1
-  (when (> gc-assumption-threshold 25)
-    (printf "gc z3...\n"))
+  (printf/debug "gc z3...\n")
   (call-z3 '((reset)))
   (call-z3 global-buffer)
   (set! decls '())

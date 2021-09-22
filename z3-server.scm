@@ -1,14 +1,14 @@
 (define z3-counter-check-sat 0)
 (define z3-counter-get-model 0)
 
-;; (define log-all-calls #t)
 (define log-all-calls #f)
+;; (define log-all-calls #t)
 
-;; (define log-all-calls-with-file #t)
 (define log-all-calls-with-file #f)
+;; (define log-all-calls-with-file #t)
 
-;; (define z3-unknown-robust #t)
 (define z3-unknown-robust #f)
+;; (define z3-unknown-robust #t)
 
 ;; (define z3-version 'z3-4.8.7)
 (define z3-version 'z3-4.8.12)
@@ -39,14 +39,14 @@
           (fprintf p^ "~a\n" r)
           (flush-output-port p^)
           (close-output-port p^)))
-      (when log-all-calls (printf "read-sat: ~a\n" r))
+      (when log-all-calls (printf/debug "read-sat: ~a\n" r))
       (if (eq? r 'sat)
           #t
           (if (eq? r 'unsat)
               #f
               (if (eq? r 'unknown)
                   (begin
-                    (printf "read-sat: unknown\n")
+                    (printf/warning "read-sat: unknown\n")
                     (when z3-unknown-robust (z/gc!))
                     #f)
                   (error 'read-sat (format "~a" r))))))))
@@ -68,7 +68,7 @@
 
 (define call-z3
   (lambda (xs)
-    (when log-all-calls (printf "call-z3 enter: xs = ~a\n" xs))
+    (when log-all-calls (printf/debug "call-z3 enter: xs = ~a\n" xs))
     (let ((xs (scheme->smt xs)))
       (when log-all-calls-with-file
         (let ((p^ (open-output-file "log.smt" 'append)))
@@ -77,7 +77,7 @@
           (flush-output-port p^)
           (close-output-port p^)))
       (for-each (lambda (x)
-                  (when log-all-calls (printf "~a\n" x))
+                  (when log-all-calls (printf/debug "~a\n" x))
                   (fprintf z3-out "~a\n" x)) xs)
       (flush-output-port z3-out))
     ))
@@ -106,7 +106,7 @@
                   (fprintf p^ "~a\n" m)))
           (flush-output-port p^)
           (close-output-port p^)))
-      (when log-all-calls (printf "~a\n" m))
+      (when log-all-calls (printf/debug "~a\n" m))
       (map (lambda (x)
              (let ((id (cadr x))
                    (params (caddr x))

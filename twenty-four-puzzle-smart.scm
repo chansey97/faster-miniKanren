@@ -1,3 +1,4 @@
+(load "logging.scm")
 (load "mk-vicare.scm")
 (load "mk.scm")
 (load "mk-streaming-interface.scm")
