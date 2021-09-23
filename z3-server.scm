@@ -13,11 +13,29 @@
 ;; (define z3-version 'z3-4.8.7)
 (define z3-version 'z3-4.8.12)
 
+(define z3-params '(;; smt.arith.solver:
+                    ;; default:0
+                    "smt.random_seed=1"
+                    ;; "smt.random_seed=2"
+                    ;; "smt.random_seed=3"
+                    
+                    ;; smt.arith.solver:
+                    ;; default:2 in z3-4.8.7
+                    ;; default:6 in z3-4.8.12
+                    ;; "smt.arith.solver=1"
+                    "smt.arith.solver=2"
+                    ;; "smt.arith.solver=6"
+                    ))
+
+(define (z3-process-start)
+  (open-process-ports (string-append "z3 -in " (fold-right (lambda (x y) (string-append x " " y)) "" z3-params))
+                      'block
+                      (native-transcoder)))
 (define-values (z3-out z3-in z3-err z3-p)
-  (open-process-ports "z3 -in smt.random_seed=1" 'block (native-transcoder)))
+  (z3-process-start))
 (define (z3-reset!)
   (let-values (((out in err p)
-                (open-process-ports "z3 -in" 'block (native-transcoder))))
+                (z3-process-start)))
     (set! z3-out out)
     (set! z3-in in)
     (set! z3-err err)
