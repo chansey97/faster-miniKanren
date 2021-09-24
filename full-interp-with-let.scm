@@ -51,6 +51,12 @@
     
     ((handle-matcho expr env val))
 
+    ((fresh (let-bindings let-body)
+       ;; multi-binding let
+       (== `(let ,let-bindings ,let-body) expr)
+       (not-in-envo 'let env)
+       (handle-leto let-bindings let-body env env val)))
+    
     ((fresh (p-name x body letrec-body)
        ;; single-function variadic letrec version
        (== `(letrec ((,p-name (lambda ,x ,body)))
@@ -65,6 +71,17 @@
        (eval-expo letrec-body
                   `((,p-name . (rec . (lambda ,x ,body))) . ,env)
                   val)))
+
+    ;; could add assert to prims
+    ((fresh (e)
+       (== `(assert ,e) expr)
+       (not-in-envo 'assert env)
+       (eval-expo e env #t)))
+
+    ((fresh (e*)
+       (== `(begin . ,e*) expr)
+       (not-in-envo 'begin env)
+       (eval-begino e* env val)))
     
     ((prim-expo expr env val))
     
@@ -92,6 +109,17 @@
        (== `((,y . ,b) . ,rest) env)
        (=/= y x)
        (not-in-envo x rest)))))
+
+(define (eval-begino e* env val)
+  (fresh (e rest)
+    (== `(,e . ,rest) e*)
+    (conde
+      ((== '() rest)
+       (eval-expo e env val))
+      ((fresh (a d ignore)
+         (== `(,a . ,d) rest)
+         (eval-expo e env ignore)
+         (eval-begino rest env val))))))
 
 (define (eval-listo expr env val)
   (conde
@@ -122,6 +150,17 @@
        (== `((,x . (val . ,a)) . ,env) env2)
        (symbolo x)
        (ext-env*o dx* da* env2 out)))))
+
+(define handle-leto
+  (lambda (let-bindings let-body original-env extended-env val)
+    (conde
+      ((== '() let-bindings)
+       (eval-expo let-body extended-env val))
+      ((fresh (x e rest v)
+         (== `((,x ,e) . ,rest) let-bindings)
+         (symbolo x)
+         (eval-expo e original-env v)
+         (handle-leto rest let-body original-env `((,x . (val . ,v)) . ,extended-env) val))))))
 
 (define (eval-primo prim-id a* val)
   (conde
@@ -169,7 +208,8 @@
        [(== prim-id '+)]
        [(== prim-id '-)]
        [(== prim-id '*)]
-       [(== prim-id '/)])
+       [(== prim-id '/)]
+       [(== prim-id 'mod)])
      (fresh (a1 a2)
        (== `(,a1 ,a2) a*)
        ;; we could use list-of-numbero instead
@@ -178,10 +218,6 @@
        (numbero a1)
        (numbero a2)
        (numbero val)
-       (conde
-         ((== prim-id '/)
-          (z/assert `(not (= ,a2 0))))
-         ((=/= prim-id '/)))
        (z/assert `(= ,val (,prim-id ,a1 ,a2))))]
     [(conde
        [(== prim-id '=)]
@@ -198,7 +234,7 @@
        (numbero a2)
        (conde
          [(z/assert `(,prim-id ,a1 ,a2)) (== #t val)]
-         [(z/assert `(not (,prim-id ,a1 ,a2))) (== #f val)]))]
+         [(z/assert `(not (,prim-id ,a1 ,a2))) (== #f val)]))]    
     ))
 
 (define (prim-expo expr env val)
@@ -270,19 +306,24 @@
                       (not . (val . (prim . not)))
                       (equal? . (val . (prim . equal?)))
                       (symbol? . (val . (prim . symbol?)))
+
                       (cons . (val . (prim . cons)))
                       (null? . (val . (prim . null?)))
                       (car . (val . (prim . car)))
                       (cdr . (val . (prim . cdr)))
+
                       (+ . (val . (prim . +)))
                       (- . (val . (prim . -)))
                       (* . (val . (prim . *)))
                       (/ . (val . (prim . /)))
+                      (mod . (val . (prim . mod)))
+                      
                       (= . (val . (prim . =)))
                       (> . (val . (prim . >)))
                       (>= . (val . (prim . >=)))
                       (< . (val . (prim . <)))
                       (<= . (val . (prim . <=)))
+                                                                  
                       . ,empty-env))
 
 (define handle-matcho
