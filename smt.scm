@@ -235,7 +235,6 @@
 ; () -> Void
 (define (z/reset!)
   (call-z3 '((reset) (push 1)))
-  ;; (call-z3 '((pop 1) (push 1)))
   (set! assumption-count 0)
   (set! all-assumptions '())
   (set! declared-types empty-subst-map)
