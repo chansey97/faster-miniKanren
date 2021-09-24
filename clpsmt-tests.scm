@@ -105,7 +105,7 @@
       '(6))
 
 
-;; slowish
+;; slowish (only in "smt.arith.solver=2")
 (test "evalo-backwards-fac-9"
       (run 1 (q)
            (evalo `(letrec ((fac
