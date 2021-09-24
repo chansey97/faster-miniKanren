@@ -251,16 +251,19 @@
          (=/= ((_.0 ())))
          (absento (abort _.0)))))
 
-(test "symbolic-exec-prog-1-subexpr-1"
-      (run* (c-val val)
-            (Bo
-             `(and (= 0 a)
-                   (not
-                    (= 0 c)))
-             `((a . 0) (c . ,c-val))
-             val))
-      '(((_.0 tt) (=/= ((_.0 ()))))
-        (() ff)))
+;; NOTE: run* diverge, because SMT enumerate all possible values instead of a simplified answer format.
+;; Run 100 is OK, but it doesn't enumerate (1 tt) in z3-4.8.12 with smt.arith.solver=6 (default), although it is a valid solution.
+;; However, (1 tt) can be enumerated in z3-4.8.7 smt.arith.solver=2 (default) and z3-4.8.12 with smt.arith.solver=2
+;; (test "symbolic-exec-prog-1-subexpr-1"
+;;       (run* (c-val val)
+;;             (Bo
+;;              `(and (= 0 a)
+;;                    (not
+;;                     (= 0 c)))
+;;              `((a . 0) (c . ,c-val))
+;;              val))
+;;       '(((_.0 tt) (=/= ((_.0 ()))))
+;;         (() ff)))
 
 
 #|
