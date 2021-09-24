@@ -4,6 +4,9 @@
 (define log-all-calls #f)
 ;; (define log-all-calls #t)
 
+;; (define z3-version 'z3-4.8.7)
+(define z3-version 'z3-4.8.12)
+
 (define-values (z3-out z3-in z3-err z3-p)
   (open-process-ports "z3 -in" 'block (native-transcoder)))
 (define (z3-reset!)
@@ -66,7 +69,9 @@
                            ((and (pair? (cadddr x)) (eq? (cadr (cadddr x)) 'BitVec)) r)
                            (else (eval r))))
                        `(lambda ,(map car (caddr x)) ,(cadddr (cdr x))))))
-           (cdr m)))))
+           (if (eq? z3-version 'z3-4.8.12)
+               m
+               (cdr m))))))
 
 (define get-model-inc
   (lambda ()
