@@ -1,3 +1,4 @@
+;; NOTE: The original tests used cvc4 (I don't know why?). I used z3 instead.
 (load "require.scm")
 
 ;; following https://barghouthi.github.io/2017/04/24/synthesis-primer/
