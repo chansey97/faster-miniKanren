@@ -71,24 +71,33 @@
      
      [(symbolo expr) (store-lookupo expr s num)]
 
-     ;; Perhaps should use (z/assert `(= ,expr ,num)) instead of (== expr num)
+     ;; Perhaps should use (smt-asserto `(= ,expr ,num)) instead of (== expr num)
      [(numbero expr) (== expr num)]
 
      [(fresh (a1 a2 n1 n2)
              (== `(+ ,a1 ,a2) expr)
-             (z/assert `(= ,num (+ ,n1 ,n2)))
+             (smt-typeo num 'Int)
+             (smt-typeo n1 'Int)
+             (smt-typeo n2 'Int)
+             (smt-asserto `(= ,num (+ ,n1 ,n2)))
              (Ao a1 s n1)
              (Ao a2 s n2))]
 
      [(fresh (a1 a2 n1 n2)
              (== `(- ,a1 ,a2) expr)
-             (z/assert `(= ,num (- ,n1 ,n2)))
+             (smt-typeo num 'Int)
+             (smt-typeo n1 'Int)
+             (smt-typeo n2 'Int)
+             (smt-asserto `(= ,num (- ,n1 ,n2)))
              (Ao a1 s n1)
              (Ao a2 s n2))]
 
      [(fresh (a1 a2 n1 n2)
              (== `(* ,a1 ,a2) expr)
-             (z/assert `(= ,num (* ,n1 ,n2)))
+             (smt-typeo num 'Int)
+             (smt-typeo n1 'Int)
+             (smt-typeo n2 'Int)
+             (smt-asserto `(= ,num (* ,n1 ,n2)))
              (Ao a1 s n1)
              (Ao a2 s n2))]
      
@@ -124,33 +133,41 @@
      
      [(fresh (a1 a2 n1 n2)
              (== `(= ,a1 ,a2) expr)
+             (smt-typeo n1 'Int)
+             (smt-typeo n2 'Int)
              (conde
-              [(== 'tt val) (z/assert `(= ,n1 ,n2))]
-              [(== 'ff val) (z/assert `(not (= ,n1 ,n2)))])         
+              [(== 'tt val) (smt-asserto `(= ,n1 ,n2))]
+              [(== 'ff val) (smt-asserto `(not (= ,n1 ,n2)))])         
              (Ao a1 s n1)
              (Ao a2 s n2))]
 
      [(fresh (a1 a2 n1 n2)
              (== `(!= ,a1 ,a2) expr)
+             (smt-typeo n1 'Int)
+             (smt-typeo n2 'Int)
              (conde
-              [(== 'tt val) (z/assert `(not (= ,n1 ,n2)))]
-              [(== 'ff val) (z/assert `(= ,n1 ,n2))])         
+              [(== 'tt val) (smt-asserto `(not (= ,n1 ,n2)))]
+              [(== 'ff val) (smt-asserto `(= ,n1 ,n2))])         
              (Ao a1 s n1)
              (Ao a2 s n2))]
 
      [(fresh (a1 a2 n1 n2)
              (== `(< ,a1 ,a2) expr)
+             (smt-typeo n1 'Int)
+             (smt-typeo n2 'Int)
              (conde
-              [(== 'tt val) (z/assert `(< ,n1 ,n2))]
-              [(== 'ff val) (z/assert `(<= ,n2 ,n1))])
+              [(== 'tt val) (smt-asserto `(< ,n1 ,n2))]
+              [(== 'ff val) (smt-asserto `(<= ,n2 ,n1))])
              (Ao a1 s n1)         
              (Ao a2 s n2))]
      
      [(fresh (a1 a2 n1 n2)
              (== `(<= ,a1 ,a2) expr)
+             (smt-typeo n1 'Int)
+             (smt-typeo n2 'Int)
              (conde
-              [(== 'tt val) (z/assert `(<= ,n1 ,n2))]
-              [(== 'ff val) (z/assert `(< ,n2 ,n1))])
+              [(== 'tt val) (smt-asserto `(<= ,n1 ,n2))]
+              [(== 'ff val) (smt-asserto `(< ,n2 ,n1))])
              (Ao a1 s n1)
              (Ao a2 s n2))]
 

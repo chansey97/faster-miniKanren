@@ -1,5 +1,4 @@
-(load "mkf.scm")
-(load "test-check.scm")
+(load "require.scm")
 (load "radiw.scm")
 
 ;; WEB -- need to try bit vector representation of sets, to see if we

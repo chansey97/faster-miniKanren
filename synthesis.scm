@@ -1,6 +1,4 @@
-(load "mk.scm")
-(load "cvc4-driver.scm")
-(load "test-check.scm")
+(load "require.scm")
 
 ;; following https://barghouthi.github.io/2017/04/24/synthesis-primer/
 
@@ -8,14 +6,14 @@
   (fresh (a b)
          (let ((shape `(+ (* ,a x) ,b)))
            (fresh ()
-                  (z/ `(declare-const ,a Int))
-                  (z/ `(declare-const ,b Int))
-                  (z/ `(assert (forall ((x Int) (y Int))
-                                       (=> (or ,@(map (lambda (ex)
-                                                        `(and (= x ,(car ex))
-                                                              (= y ,(cdr ex))))
-                                                      exs))
-                                           (= y ,shape)))))
+                  (smt-typeo a 'Int)
+                  (smt-typeo b 'Int)
+                  (smt-asserto `(forall ((x Int) (y Int))
+                                        (=> (or ,@(map (lambda (ex)
+                                                         `(and (= x ,(car ex))
+                                                               (= y ,(cdr ex))))
+                                                       exs))
+                                            (= y ,shape))))
                   z/purge
                   (fresh (ax axb)
                          (conde ((== a 1) (== ax 'x))

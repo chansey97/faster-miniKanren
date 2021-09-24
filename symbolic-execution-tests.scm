@@ -1,7 +1,5 @@
-;(load "mk.scm")
-;(load "z3-driver.scm")
-;(load "test-check.scm")
-(load "../clpsmt-miniKanren/full-interp.scm")
+(load "require.scm")
+(load "full-interp.scm")
 
 (test "symbolic-execution-1a"
       (run 10 (q)
@@ -186,9 +184,12 @@
       (run 8 (q)
            (fresh (alpha beta gamma s)
                   (== (list alpha beta gamma s) q)
-                  (z/assert `(<= 0 ,alpha))
-                  (z/assert `(<= 0 ,beta))
-                  (z/assert `(<= 0 ,gamma))
+                  (smt-typeo alpha 'Int)
+                  (smt-typeo beta 'Int)
+                  (smt-typeo gamma 'Int)
+                  (smt-asserto `(<= 0 ,alpha))
+                  (smt-asserto `(<= 0 ,beta))
+                  (smt-asserto `(<= 0 ,gamma))
                   (->o
                    `(,symbolic-exec-prog
                      ((a . ,alpha)
@@ -208,9 +209,12 @@
       (run 1 (q)
            (fresh (alpha beta gamma s)
                   (== (list alpha beta gamma s) q)
-                  (z/assert `(not (= 0 ,alpha)))
-                  (z/assert `(<= 0 ,beta))
-                  (z/assert `(<= 0 ,gamma))
+                  (smt-typeo alpha 'Int)
+                  (smt-typeo beta 'Int)
+                  (smt-typeo gamma 'Int)
+                  (smt-asserto `(not (= 0 ,alpha)))
+                  (smt-asserto `(<= 0 ,beta))
+                  (smt-asserto `(<= 0 ,gamma))
                   (->o
                    `(,symbolic-exec-prog
                      ((a . ,alpha)
@@ -223,7 +227,8 @@
       (run 1 (q)
            (fresh (alpha beta gamma s)
                   (== (list alpha beta gamma s) q)
-                  (z/assert `(not (= 0 ,alpha)))
+                  (smt-typeo alpha 'Int)
+                  (smt-asserto `(not (= 0 ,alpha)))
                   (->o
                    `(,symbolic-exec-prog
                      ((a . ,alpha)
@@ -236,7 +241,8 @@
       (run 8 (q)
            (fresh (alpha beta gamma s)
                   (== (list alpha beta gamma s) q)
-                  (z/assert `(not (= 0 ,beta)))
+                  (smt-typeo beta 'Int)
+                  (smt-asserto `(not (= 0 ,beta)))
                   (->o
                    `(,symbolic-exec-prog
                      ((a . ,alpha)

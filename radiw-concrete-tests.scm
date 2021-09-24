@@ -1,5 +1,5 @@
-(load "../clpsmt-miniKanren/radiw-concrete.scm")
-;(load "test-check.scm")
+(load "require.scm")
+(load "radiw-concrete.scm")
 
 ;; WEB todo
 ;;

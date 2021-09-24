@@ -1,6 +1,4 @@
-(load "mk.scm")
-(load "z3-driver.scm")
-(load "test-check.scm")
+(load "require.scm")
 (load "while-abort.scm")
 
 ;;; Adapted from https://github.com/webyrd/polyconf-2015/blob/master/talk-code/while-interpreter/while-abort-tests.scm
@@ -100,9 +98,12 @@
       (run 8 (q)
            (fresh (alpha beta gamma s)
                   (== (list alpha beta gamma s) q)
-                  (z/assert `(<= 0 ,alpha))
-                  (z/assert `(<= 0 ,beta))
-                  (z/assert `(<= 0 ,gamma))
+                  (smt-typeo alpha 'Int)
+                  (smt-typeo beta 'Int)
+                  (smt-typeo gamma 'Int)
+                  (smt-asserto `(<= 0 ,alpha))
+                  (smt-asserto `(<= 0 ,beta))
+                  (smt-asserto `(<= 0 ,gamma))
                   (->o
                    `(,symbolic-exec-prog
                      ((a . ,alpha)
@@ -209,9 +210,9 @@
            (fresh (s)
                   (->o
                    `(,symbolic-exec-prog-1
-                     ((a . (num ,alpha))
-                      (b . (num ,beta))
-                      (c . (num ,gamma))))
+                     ((a . ,alpha)
+                      (b . ,beta)
+                      (c . ,gamma)))
                    `(abort ,s))))
       '(((()      ; a == 0
           (0 0 1) ; b == 4
@@ -240,9 +241,9 @@
            (fresh (s)
                   (->o
                    `(,symbolic-exec-prog-1
-                     ((a . (num ,alpha))
-                      (b . (num ,beta))
-                      (c . (num ,gamma))))
+                     ((a . ,alpha)
+                      (b . ,beta)
+                      (c . ,gamma)))
                    `(abort ,s))))
       '(((()      ; a == 0
           (0 0 1) ; b == 4
@@ -253,10 +254,10 @@
 (test "symbolic-exec-prog-1-subexpr-1"
       (run* (c-val val)
             (Bo
-             `(and (= ,(num 0) a)
+             `(and (= 0 a)
                    (not
-                    (= ,(num 0) c)))
-             `((a . (num ())) (c . (num ,c-val)))
+                    (= 0 c)))
+             `((a . 0) (c . ,c-val))
              val))
       '(((_.0 tt) (=/= ((_.0 ()))))
         (() ff)))

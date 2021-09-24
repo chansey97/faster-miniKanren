@@ -1,5 +1,4 @@
-(load "mkf.scm")
-(load "test-check.scm")
+(load "require.scm")
 (load "radif.scm")
 
 ;;; WEB

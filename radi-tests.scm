@@ -1,7 +1,5 @@
-;;(load "mk.scm")
-;;(load "z3-driver.scm")
-;;(load "test-check.scm")
-(load "../clpsmt-miniKanren/radi.scm")
+(load "require.scm")
+(load "radi.scm")
 
 (test "set-unionso-0"
       (run* [q]

@@ -107,9 +107,11 @@
 
 (define (injo i a)
   (conde
-   [(z/assert `(< ,i 0)) (== a 'neg)]
+   [(smt-typeo i 'Int)
+    (smt-asserto `(< ,i 0)) (== a 'neg)]
    [(== i 0) (== a 'zer)]
-   [(z/assert `(> ,i 0)) (== a 'pos)]))
+   [(smt-typeo i 'Int)
+    (smt-asserto `(> ,i 0)) (== a 'pos)]))
 
 (define (combo f u os1 s1 s2 s3)
   (conde
@@ -356,7 +358,9 @@
   (conde
    [(== n 0) (== out cache)]
    [(fresh [r cachep n-1]
-           (z/assert `(= (+ 1 ,n-1) ,n))
+           (smt-typeo n 'Int)
+           (smt-typeo n-1 'Int)
+           (smt-asserto `(= (+ 1 ,n-1) ,n))
            (adivalpo e '() cache '() `(,r ,cachep))
            (iterpo n-1 e cachep out))]))
 

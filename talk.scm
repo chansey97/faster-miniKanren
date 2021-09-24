@@ -6,9 +6,7 @@
 ;; an embedded domain-specific language in Scheme, to create an environment for constraint logic programming.
 ;; We describe the simple implementation and illustrate the technology through interpreters, synthesis, and symbolic execution.
 
-;(load "mk.scm")
-;(load "z3-driver.scm")
-;(load "test-check.scm")
+(load "require.scm")
 
 ;; crash course on miniKanren
 (define appendo
@@ -37,7 +35,7 @@
         ((a b c d) (e))
         ((a b c d e) ())))
 
-(load "../clpsmt-miniKanren/full-interp-quine.scm")
+(load "full-interp-quine.scm")
 
 (test "evalo-append-forward"
       (run* (q)
@@ -120,47 +118,61 @@
 
 (test "basic-1"
       (run* (q)
-            (z/assert `(> ,q 0))
-            (z/assert `(< ,q 2)))
+            (smt-typeo q 'Int)
+            (smt-asserto `(> ,q 0))
+            (smt-asserto `(< ,q 2)))
       '(1))
 
 (test "basic-2"
       (run 3 (q)
            (fresh (x y)
                   (== q `(,x ,y))
-                  (z/assert `(>= ,x 0))
-                  (z/assert `(>= ,y 0))
-                  (z/assert `(= ,x (+ ,y 1)))))
+                  (smt-typeo x 'Int)
+                  (smt-typeo y 'Int)
+                  (smt-asserto `(>= ,x 0))
+                  (smt-asserto `(>= ,y 0))
+                  (smt-asserto `(= ,x (+ ,y 1)))))
       '((1 0) (2 1) (3 2)))
 
 (test "basic-conde-1"
       (run* (q)
+            (smt-typeo q 'Int)
             (conde
-             ((z/assert `(> ,q 0))
-              (z/assert `(< ,q 2)))
-             ((z/assert `(= ,q 2)))))
+             ((smt-asserto `(> ,q 0))
+              (smt-asserto `(< ,q 2)))
+             ((smt-asserto `(= ,q 2)))))
       '(2 1))
 
 (define faco
   (lambda (n out)
-    (conde ((z/assert `(= ,n 0))
-            (z/assert `(= ,out 1)))
-           ((z/assert `(> ,n 0))
-            (fresh (n-1 r)
-                   (z/assert `(= (- ,n 1) ,n-1))
-                   (z/assert `(= (* ,n ,r) ,out))
-                   (faco n-1 r))))))
+    (fresh ()
+           (smt-typeo n 'Int)
+           (smt-typeo out 'Int)
+           (conde ((smt-asserto `(= ,n 0))
+                   (smt-asserto `(= ,out 1)))
+                  ((smt-asserto `(> ,n 0))
+                   (fresh (n-1 r)
+                          (smt-typeo n-1 'Int)
+                          (smt-typeo r 'Int)
+                          (smt-asserto `(= (- ,n 1) ,n-1))
+                          (smt-asserto `(= (* ,n ,r) ,out))
+                          (faco n-1 r)))))))
 
 ;; equivalent
 (define facto
   (lambda (n out)
-    (conde ((== n 0)
-            (== out 1))
-           ((z/assert `(> ,n 0))
-            (fresh (n-1 r)
-                   (z/assert `(= (- ,n 1) ,n-1))
-                   (z/assert `(= (* ,n ,r) ,out))
-                   (facto n-1 r))))))
+    (fresh ()
+           (conde ((== n 0)
+                   (== out 1))
+                  ((smt-typeo n 'Int)
+                   (smt-asserto `(> ,n 0))
+                   (fresh (n-1 r)
+                          (smt-typeo n-1 'Int)
+                          (smt-typeo r 'Int)
+                          (smt-typeo out 'Int)
+                          (smt-asserto `(= (- ,n 1) ,n-1))
+                          (smt-asserto `(= (* ,n ,r) ,out))
+                          (facto n-1 r)))))))
 
 (test "faco-7"
       (run 7 (q)
@@ -197,7 +209,7 @@
             (facto q 720))
       '(6))
 
-(load "../clpsmt-miniKanren/full-interp.scm")
+(load "full-interp.scm")
 
 (test "evalo-1"
       (run* (q)
@@ -270,7 +282,7 @@
         (lambda (x) (* 2 x))
         (lambda (x) (* x 2))))
 
-(load "../clpsmt-miniKanren/while-abort.scm")
+(load "while-abort.scm")
 
 ;;; The following example is adapted from:
 ;;;
@@ -331,9 +343,12 @@
       (run 1 (q)
            (fresh (alpha beta gamma s)
                   (== (list alpha beta gamma s) q)
-                  (z/assert `(not (= 0 ,alpha)))
-                  (z/assert `(<= 0 ,beta))
-                  (z/assert `(<= 0 ,gamma))
+                  (smt-typeo alpha 'Int)
+                  (smt-typeo beta 'Int)
+                  (smt-typeo gamma 'Int)
+                  (smt-asserto `(not (= 0 ,alpha)))
+                  (smt-asserto `(<= 0 ,beta))
+                  (smt-asserto `(<= 0 ,gamma))
                   (->o
                    `(,symbolic-exec-prog
                      ((a . ,alpha)
@@ -346,7 +361,8 @@
       (run 1 (q)
            (fresh (alpha beta gamma s)
                   (== (list alpha beta gamma s) q)
-                  (z/assert `(not (= 0 ,alpha)))
+                  (smt-typeo alpha 'Int)
+                  (smt-asserto `(not (= 0 ,alpha)))
                   (->o
                    `(,symbolic-exec-prog
                      ((a . ,alpha)
@@ -359,7 +375,8 @@
       (run 8 (q)
            (fresh (alpha beta gamma s)
                   (== (list alpha beta gamma s) q)
-                  (z/assert `(not (= 0 ,beta)))
+                  (smt-typeo beta 'Int)
+                  (smt-asserto `(not (= 0 ,beta)))
                   (->o
                    `(,symbolic-exec-prog
                      ((a . ,alpha)

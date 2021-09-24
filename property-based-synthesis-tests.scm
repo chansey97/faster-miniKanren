@@ -1,7 +1,5 @@
-;(load "mk.scm")
-;(load "z3-driver.scm")
-;(load "test-check.scm")
-(load "../clpsmt-miniKanren/full-interp-extended.scm")
+(load "require.scm")
+(load "full-interp-extended.scm")
 
 
 (test "synthesize-triple-by-example-2c13"
@@ -155,7 +153,9 @@
                   (== `(lambda (x) ,e) f)
                   (numbero x)
                   (numbero x-tripled)
-                  (z/assert `(= ,x (* 3 ,x-tripled)))
+                  (smt-typeo x 'Int)
+                  (smt-typeo x-tripled 'Int)
+                  (smt-asserto `(= ,x (* 3 ,x-tripled)))
                   (evalo `(,f ,x) x-tripled)))
       '(((lambda (x) 0) 0 0)))
 
@@ -352,11 +352,14 @@
                   (numbero x)
                   (numbero y)
                   (numbero z)
-                  (z/assert `(<= 0 ,y))
-                  (z/assert `(<= 0 ,x))
-                  (z/assert `(<= 0 ,z))
+                  (smt-typeo x 'Int)
+                  (smt-typeo y 'Int)
+                  (smt-typeo z 'Int)
+                  (smt-asserto `(<= 0 ,y))
+                  (smt-asserto `(<= 0 ,x))
+                  (smt-asserto `(<= 0 ,z))
                   ;; assert z is odd
-                  (z/assert `(= ,z (+ (* 2 ,y) 1)))
+                  (smt-asserto `(= ,z (+ (* 2 ,y) 1)))
                   (evalo `(letrec ((fac
                                     (lambda (n)
                                       (if (< n 0) #f
@@ -373,11 +376,14 @@
                   (numbero x)
                   (numbero y)
                   (numbero z)
-                  (z/assert `(<= 0 ,y))
-                  (z/assert `(<= 0 ,x))
-                  (z/assert `(<= 0 ,z))
+                  (smt-typeo x 'Int)
+                  (smt-typeo y 'Int)
+                  (smt-typeo z 'Int)
+                  (smt-asserto `(<= 0 ,y))
+                  (smt-asserto `(<= 0 ,x))
+                  (smt-asserto `(<= 0 ,z))
                   ;; assert z is odd
-                  (z/assert `(= ,z (+ (* 2 ,y) 1)))
+                  (smt-asserto `(= ,z (+ (* 2 ,y) 1)))
                   (evalo `(letrec ((fac
                                     (lambda (n)
                                       (if (< n 0) #f
@@ -398,11 +404,14 @@
                    (numbero x)
                    (numbero y)
                    (numbero z)
-                   (z/assert `(<= 0 ,y))
-                   (z/assert `(<= 0 ,x))
-                   (z/assert `(<= 0 ,z))
+                   (smt-typeo x 'Int)
+                   (smt-typeo y 'Int)
+                   (smt-typeo z 'Int)
+                   (smt-asserto `(<= 0 ,y))
+                   (smt-asserto `(<= 0 ,x))
+                   (smt-asserto `(<= 0 ,z))
                    ;; assert z is odd
-                   (z/assert `(= ,z (+ (* 2 ,y) 1)))
+                   (smt-asserto `(= ,z (+ (* 2 ,y) 1)))
                    (evalo `(letrec ((fac
                                      (lambda (n)
                                        (if (< n 0) #f
@@ -420,11 +429,14 @@
                   (numbero x)
                   (numbero y)
                   (numbero z)
-                  (z/assert `(<= 0 ,y))
-                  (z/assert `(<= 0 ,x))
-                  (z/assert `(<= 0 ,z))
+                  (smt-typeo x 'Int)
+                  (smt-typeo y 'Int)
+                  (smt-typeo z 'Int)
+                  (smt-asserto `(<= 0 ,y))
+                  (smt-asserto `(<= 0 ,x))
+                  (smt-asserto `(<= 0 ,z))
                   ;; assert z is even
-                  (z/assert `(= ,z (* 2 ,y)))
+                  (smt-asserto `(= ,z (* 2 ,y)))
                   (evalo `(letrec ((fac
                                     (lambda (n)
                                       (if (< n 0) #f
@@ -543,7 +555,8 @@
 (test "evalo-symbolic-execution-d"
       (run 1 (q)
            (fresh (alpha beta gamma vals)
-                  (z/assert `(not (= 0 ,beta)))
+                  (smt-typeo beta 'Int)
+                  (smt-asserto `(not (= 0 ,beta)))
                   (== (list alpha beta gamma vals) q)
                   (evalo `(let ((a ',alpha))
                             (let ((b ',beta))
@@ -566,7 +579,8 @@
 (test "evalo-symbolic-execution-e"
       (run 1 (q)
            (fresh (alpha beta gamma vals)
-                  (z/assert `(not (= 0 ,alpha)))
+                  (smt-typeo alpha 'Int)
+                  (smt-asserto `(not (= 0 ,alpha)))
                   (== (list alpha beta gamma vals) q)
                   (evalo `(let ((a ',alpha))
                             (let ((b ',beta))
@@ -619,7 +633,8 @@
 (test "evalo-symbolic-execution-g"
       (run 8 (q)
            (fresh (alpha beta gamma vals)
-                  (z/assert `(not (= 0 ,beta)))
+                  (smt-typeo beta 'Int)
+                  (smt-asserto `(not (= 0 ,beta)))
                   (== (list alpha beta gamma vals) q)
                   (evalo `((lambda (a b c)
                              (let ((x (if (!= a 0)
@@ -649,10 +664,13 @@
 (test "evalo-symbolic-execution-g2"
       (run* (q)
             (fresh (alpha beta gamma vals)
-                   (z/assert `(<= 0 ,alpha))
-                   (z/assert `(<= 0 ,beta))
-                   (z/assert `(<= 0 ,gamma))
-                   (z/assert `(<= ,gamma 10))
+                   (smt-typeo alpha 'Int)
+                   (smt-typeo beta 'Int)
+                   (smt-typeo gamma 'Int)
+                   (smt-asserto `(<= 0 ,alpha))
+                   (smt-asserto `(<= 0 ,beta))
+                   (smt-asserto `(<= 0 ,gamma))
+                   (smt-asserto `(<= ,gamma 10))
                    (== (list alpha beta gamma vals) q)
                    (evalo `((lambda (a b c)
                               (let ((x (if (!= a 0)
@@ -723,7 +741,8 @@
 (test "evalo-symbolic-execution-h"
       (run* (q)
             (fresh (alpha beta gamma vals)
-                   (z/assert `(not (= 0 ,alpha)))
+                   (smt-typeo alpha 'Int)
+                   (smt-asserto `(not (= 0 ,alpha)))
                    (== (list alpha beta gamma vals) q)
                    (evalo `((lambda (a b c)
                               (let ((x (if (!= a 0)
@@ -779,7 +798,8 @@
 (test "evalo-symbolic-execution-j"
       (run 8 (q)
            (fresh (alpha beta gamma vals)
-                  (z/assert `(not (= 0 ,beta)))
+                  (smt-typeo beta 'Int)
+                  (smt-asserto `(not (= 0 ,beta)))
                   (== (list alpha beta gamma vals) q)
                   (evalo `((lambda (a b c)
                              ((lambda (x y z)
@@ -812,7 +832,8 @@
 (test "evalo-symbolic-execution-k"
       (run* (q)
             (fresh (alpha beta gamma vals)
-                   (z/assert `(not (= 0 ,alpha)))
+                   (smt-typeo alpha 'Int)
+                   (smt-asserto `(not (= 0 ,alpha)))
                    (== (list alpha beta gamma vals) q)
                    (evalo `((lambda (a b c)
                               ((lambda (x y z)

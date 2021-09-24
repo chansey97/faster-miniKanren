@@ -2,10 +2,8 @@
 
 ;; Examples taken from http://doctrina.org/How-RSA-Works-With-Examples.html
 
-;(load "mk.scm")
-;(load "z3-driver.scm")
-(load "../clpsmt-miniKanren/full-interp-with-let.scm")
-;(load "test-check.scm")
+(load "require.scm")
+(load "full-interp-with-let.scm")
 
 ;; test 'begin' extension to evalo
 (test "evalo-begin-1"
