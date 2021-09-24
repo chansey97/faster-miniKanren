@@ -23,8 +23,8 @@
                     ;; default:2 in z3-4.8.7
                     ;; default:6 in z3-4.8.12
                     ;; "smt.arith.solver=1"
-                    "smt.arith.solver=2"
-                    ;; "smt.arith.solver=6"
+                    ;; "smt.arith.solver=2"
+                    "smt.arith.solver=6"
                     ))
 
 (define (z3-process-start)
