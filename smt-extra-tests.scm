@@ -41,6 +41,27 @@
       (== b 2)))
   '((2 2)))
 
+(define faco
+  (lambda (n out)
+    (conde ((z/assert `(= ,n 0))
+            (z/assert `(= ,out 1)))
+           ((z/assert `(> ,n 0))
+            (fresh (n-1 r)
+              (z/assert `(= (- ,n 1) ,n-1))
+              (z/assert `(= (* ,n ,r) ,out))
+              (faco n-1 r))))))
+
+;; equivalent
+(define facto
+  (lambda (n out)
+    (conde ((== n 0)
+            (== out 1))
+           ((z/assert `(> ,n 0))
+            (fresh (n-1 r)
+              (z/assert `(= (- ,n 1) ,n-1))
+              (z/assert `(= (* ,n ,r) ,out))
+              (facto n-1 r))))))
+
 (test "faco-0"
   (run* (q)
     (fresh (out)
