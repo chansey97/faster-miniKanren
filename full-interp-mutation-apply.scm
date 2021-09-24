@@ -1,3 +1,7 @@
+;; supports let, begin, apply, set!
+;;
+;; expressing-passing, environment-passing, store-passing interpreter
+
 ;; The definition of 'letrec' is based based on Dan Friedman's code,
 ;; using the "half-closure" approach from Reynold's definitional
 ;; interpreters.
@@ -25,6 +29,13 @@
          ;; Multi-argument
          ((list-of-symbolso x)))
        (not-in-envo 'lambda env)))
+
+    ((fresh (x e body a env^)
+       (== `(let ((,x ,e)) ,body) expr)
+       (symbolo x)
+       (ext-envo x a env env^)
+       (eval-expo e env a)
+       (eval-expo body env^ val)))
     
     ((fresh (rator x rands body env^ a* res)
        (== `(,rator . ,rands) expr)
@@ -113,6 +124,11 @@
        (symbolo a)
        (list-of-symbolso d)))))
 
+(define (ext-envo x a env out)
+  (fresh ()
+    (== `((,x . (val . ,a)) . ,env) out)
+    (symbolo x)))
+
 (define (ext-env*o x* a* env out)
   (conde
     ((== '() x*) (== '() a*) (== env out))
@@ -177,12 +193,15 @@
        ;; (list-of-numbero a*)
        (numbero a1)
        (numbero a2)
-       (numbero val)
-       (conde
-         ((== prim-id '/)
-          (z/assert `(not (= ,a2 0))))
-         ((=/= prim-id '/)))
        (z/assert `(= ,val (,prim-id ,a1 ,a2))))]
+    [(== prim-id '!=)
+     (fresh (a1 a2)
+       (== `(,a1 ,a2) a*)
+       (numbero a1)
+       (numbero a2)
+       (conde
+         [(z/assert `(not (= ,a1 ,a2))) (== #t val)]
+         [(z/assert `(= ,a1 ,a2)) (== #f val)]))]
     [(conde
        [(== prim-id '=)]
        [(== prim-id '>)]
@@ -279,6 +298,7 @@
                       (* . (val . (prim . *)))
                       (/ . (val . (prim . /)))
                       (= . (val . (prim . =)))
+                      (!= . (val . (prim . !=)))
                       (> . (val . (prim . >)))
                       (>= . (val . (prim . >=)))
                       (< . (val . (prim . <)))

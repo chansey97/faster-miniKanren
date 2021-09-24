@@ -25,6 +25,33 @@
          ;; Multi-argument
          ((list-of-symbolso x)))
        (not-in-envo 'lambda env)))
+
+
+    ;; McCarthy's 'amb' operator, with 'require'
+    ;; See http://community.schemewiki.org/?amb
+    ;;
+    ;;  (let ((a (amb 1 2))
+    ;;        (b (amb 1 2)))
+    ;;    (require (< a b))
+    ;;    (list a b))
+    ((fresh (e v)
+       (== `(require ,e) expr)
+       (== 'void val)
+       (=/= #f v)
+       (eval-expo e env v)
+       (not-in-envo 'require env)))
+
+    ;; McCarthy's 'amb' operator
+    ;; See http://community.schemewiki.org/?amb
+    ;;
+    ;;  (let ((a (amb 1 2))
+    ;;        (b (amb 1 2)))
+    ;;    (require (< a b))
+    ;;    (list a b))
+    ((fresh (e*)
+       (== `(amb . ,e*) expr)
+       (evaluate-oneo e* env val)
+       (not-in-envo 'amb env)))
     
     ((fresh (rator x rands body env^ a* res)
        (== `(,rator . ,rands) expr)
@@ -50,7 +77,7 @@
        (eval-listo rands env a*)))
     
     ((handle-matcho expr env val))
-
+        
     ((fresh (p-name x body letrec-body)
        ;; single-function variadic letrec version
        (== `(letrec ((,p-name (lambda ,x ,body)))
@@ -65,12 +92,41 @@
        (eval-expo letrec-body
                   `((,p-name . (rec . (lambda ,x ,body))) . ,env)
                   val)))
+
+    ((fresh (x e body a env^)
+       (== `(let ((,x ,e)) ,body) expr)
+       (symbolo x)
+       (ext-envo x a env env^)
+       (eval-expo e env a)
+       (eval-expo body env^ val)))
+    
+    ((fresh (begin-body)
+       (== `(begin . ,begin-body) expr)
+       (eval-begino begin-body env val)
+       (not-in-envo 'begin env)))
     
     ((prim-expo expr env val))
     
     ))
 
 (define empty-env '())
+
+(define (evaluate-oneo e* env val)
+  (fresh (e e-rest)
+    (== `(,e . ,e-rest) e*)
+    (conde
+      ((eval-expo e env val))
+      ((evaluate-oneo e-rest env val)))))
+
+(define (eval-begino begin-body env val)
+  (conde
+    ((fresh (e)
+       (== `(,e) begin-body)
+       (eval-expo e env val)))
+    ((fresh (e e1 e-rest ignore-val)
+       (== `(,e ,e1 . ,e-rest) begin-body)
+       (eval-expo e env ignore-val)
+       (eval-begino `(,e1 . ,e-rest) env val)))))
 
 (define (lookupo x env t)
   (fresh (y b rest)
@@ -112,6 +168,11 @@
        (== `(,a . ,d) los)
        (symbolo a)
        (list-of-symbolso d)))))
+
+(define (ext-envo x a env out)
+  (fresh ()
+    (== `((,x . (val . ,a)) . ,env) out)
+    (symbolo x)))
 
 (define (ext-env*o x* a* env out)
   (conde
@@ -178,11 +239,15 @@
        (numbero a1)
        (numbero a2)
        (numbero val)
-       (conde
-         ((== prim-id '/)
-          (z/assert `(not (= ,a2 0))))
-         ((=/= prim-id '/)))
        (z/assert `(= ,val (,prim-id ,a1 ,a2))))]
+    [(== prim-id '!=)
+     (fresh (a1 a2)
+       (== `(,a1 ,a2) a*)
+       (numbero a1)
+       (numbero a2)
+       (conde
+         [(== #t val) (z/assert `(not (= ,a1 ,a2)))]
+         [(== #f val) (z/assert `(= ,a1 ,a2))]))]
     [(conde
        [(== prim-id '=)]
        [(== prim-id '>)]
@@ -197,8 +262,8 @@
        (numbero a1)
        (numbero a2)
        (conde
-         [(z/assert `(,prim-id ,a1 ,a2)) (== #t val)]
-         [(z/assert `(not (,prim-id ,a1 ,a2))) (== #f val)]))]
+         [(== #t val) (z/assert `(,prim-id ,a1 ,a2))]
+         [(== #f val) (z/assert `(not (,prim-id ,a1 ,a2)))]))]
     ))
 
 (define (prim-expo expr env val)
@@ -279,6 +344,7 @@
                       (* . (val . (prim . *)))
                       (/ . (val . (prim . /)))
                       (= . (val . (prim . =)))
+                      (!= . (val . (prim . !=)))
                       (> . (val . (prim . >)))
                       (>= . (val . (prim . >=)))
                       (< . (val . (prim . <)))

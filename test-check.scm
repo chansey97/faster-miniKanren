@@ -11,4 +11,16 @@
              (begin
                (set! test-failed #t)
                (printf "Failed: ~a~%Expected: ~a~%Computed: ~a~%"
-                     'tested-expression expected produced))))))))
+                       'tested-expression expected produced))))))))
+
+(define-syntax time-test
+  (syntax-rules ()
+    ((_ title tested-expression expected-result)
+     (test title
+       (time tested-expression)
+       expected-result))))
+     
+(define-syntax todo
+  (syntax-rules ()
+    ((_ title tested-expression expected-result)
+     (printf "TODO ~s\n" title))))
