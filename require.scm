@@ -8,11 +8,18 @@
 (load "test-check.scm")
 
 ;; (mode 'naive)
-;; (mode `(assumptions 1000 #f))  ; don't assert negative assms. seems faster.
-;; (mode `(assumptions 1000 #t))  ; asssert negative assms
-(mode `(assumptions 25 #t))
 ;; (mode 'push-pop)
 ;; (mode 'reset-as-pop-push)
+
+;; (define assumptions+reset-as-pop-push #t) ; using reset-as-pop-push in assumptions mode.
+(define assumptions+reset-as-pop-push #f) ; using reset-as-pop-push in assumptions mode.
+
+;; (mode `(assumptions 1000 #f))  ; don't assert negative assms. seems faster.
+;; (mode `(assumptions 1000 #t))  ; asssert negative assms
+;; (mode `(assumptions 25 #f))
+(mode `(assumptions 25 #t))
+
+
 
 (displayln (mode))
 

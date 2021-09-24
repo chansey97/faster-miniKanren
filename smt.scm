@@ -235,6 +235,17 @@
 ; () -> Void
 (define (z/reset!)
   (call-z3 '((reset) (push 1)))
+  ;; (call-z3 '((pop 1) (push 1)))
+  (set! assumption-count 0)
+  (set! all-assumptions '())
+  (set! declared-types empty-subst-map)
+  (set! last-buffer '())
+  (set! current-buffer '())
+  (set! assertion-to-assumption '()))
+
+(define (z/reset!^)
+  ;; (call-z3 '((reset) (push 1)))
+  (call-z3 '((pop 1) (push 1)))
   (set! assumption-count 0)
   (set! all-assumptions '())
   (set! declared-types empty-subst-map)
@@ -284,7 +295,7 @@
        (match (mode)
          [(assumptions ,_1 ,_2) (guard (null? optional))
           (printf/warning "got unknown; retrying after reset")
-          (z/reset!)
+          (if assumptions+reset-as-pop-push (z/reset!^) (z/reset!))
           (z/check st #t)]
          [,_
           (printf/warning "got unknown; unsoundly failing branch")
@@ -296,7 +307,7 @@
     [(assumptions ,max-assms ,_)
      (when (> assumption-count max-assms)
        (printf/debug "gc z3...\n")
-       (z/reset!))]
+       (if assumptions+reset-as-pop-push (z/reset!^) (z/reset!)))]
     [naive (z/reset!)]
     [reset-as-pop-push
       (reset-state!)

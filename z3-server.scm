@@ -2,6 +2,7 @@
 (define z3-counter-get-model 0)
 
 (define log-all-calls #f)
+;; (define log-all-calls #t)
 
 (define-values (z3-out z3-in z3-err z3-p)
   (open-process-ports "z3 -in" 'block (native-transcoder)))
