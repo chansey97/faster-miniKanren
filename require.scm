@@ -1,5 +1,6 @@
 (load "mk-vicare.scm")
 (load "mk.scm")
+(load "mk-streaming-interface.scm")
 (load "match.scm")
 (load "smt.scm")
 (load "z3-server.scm")

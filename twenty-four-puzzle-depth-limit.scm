@@ -1,6 +1,4 @@
-(load "mk.scm")
-(load "z3-driver.scm")
-(load "test-check.scm")
+(load "require.scm")
 
 ;;; Classic 24 math puzzle, as described at:
 ;;;
