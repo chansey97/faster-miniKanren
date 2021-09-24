@@ -283,11 +283,11 @@
       [unknown
        (match (mode)
          [(assumptions ,_1 ,_2) (guard (null? optional))
-          (displayln "got unknown; retrying after reset")
+          (printf/warning "got unknown; retrying after reset")
           (z/reset!)
           (z/check st #t)]
          [,_
-          (displayln "got unknown; unsoundly failing branch")
+          (printf/warning "got unknown; unsoundly failing branch")
           #f])])))
 
 ; () -> Void
@@ -295,7 +295,7 @@
   (match (mode)
     [(assumptions ,max-assms ,_)
      (when (> assumption-count max-assms)
-       (printf "gc z3...\n")
+       (printf/debug "gc z3...\n")
        (z/reset!))]
     [naive (z/reset!)]
     [reset-as-pop-push

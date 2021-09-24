@@ -1,3 +1,4 @@
+(load "logging.scm")
 (load "mk-vicare.scm")
 (load "mk.scm")
 (load "mk-streaming-interface.scm")
@@ -6,11 +7,12 @@
 (load "z3-server.scm")
 (load "test-check.scm")
 
-;(mode 'naive)
-;(mode `(assumptions 1000 #f))  ; don't assert negative assms. seems faster.
-;(mode `(assumptions 1000 #t))  ; asssert negative assms
-;(mode 'push-pop)
-(mode 'reset-as-pop-push)
+;; (mode 'naive)
+;; (mode `(assumptions 1000 #f))  ; don't assert negative assms. seems faster.
+;; (mode `(assumptions 1000 #t))  ; asssert negative assms
+(mode `(assumptions 25 #t))
+;; (mode 'push-pop)
+;; (mode 'reset-as-pop-push)
 
 (displayln (mode))
 
