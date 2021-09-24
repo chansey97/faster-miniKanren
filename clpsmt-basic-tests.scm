@@ -59,19 +59,21 @@
             (smt-asserto `(= ,q 0)))
       '(0))
 
-(test "5"
-      (run 2 (f)
-           (smt-typeo f '(-> Int Int))
-           (smt-asserto `(= 1 (,f 1)))
-           (smt-asserto `(= 0 (,f 0))))
-      ;; TODO:
-      ;; what do we really want here? syntax lambda or actual lambda?
-      '((lambda (x!0) (ite (= x!0 1) 1 (ite (= x!0 0) 0 1)))))
+;; TODO: Support other types
 
-(test "6"
-      (run 1 (q)
-           (fresh (f x)
-                  (smt-typeo f '(-> Int Int))
-                  (smt-asserto `(= ,x (,f ,x)))
-                  (== q x)))
-      '(0))
+;; (test "5"
+;;       (run 2 (f)
+;;            (smt-typeo f '(-> Int Int))
+;;            (smt-asserto `(= 1 (,f 1)))
+;;            (smt-asserto `(= 0 (,f 0))))
+;;       ;; TODO:
+;;       ;; what do we really want here? syntax lambda or actual lambda?
+;;       '((lambda (x!0) (ite (= x!0 1) 1 (ite (= x!0 0) 0 1)))))
+
+;; (test "6"
+;;       (run 1 (q)
+;;            (fresh (f x)
+;;                   (smt-typeo f '(-> Int Int))
+;;                   (smt-asserto `(= ,x (,f ,x)))
+;;                   (== q x)))
+;;       '(0))
