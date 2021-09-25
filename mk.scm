@@ -34,11 +34,12 @@
 ; to a value or are bound in the substitution
 (define unbound (list 'unbound))
 
+(define counter -1)
+
 (define var
-  (let ((counter -1))
-    (lambda (scope)
-      (set! counter (+ 1 counter))
-      (vector unbound scope counter))))
+  (lambda (scope)
+    (set! counter (+ 1 counter))
+    (vector unbound scope counter)))
 
 ; Vectors are not allowed as terms, so terms that are vectors
 ; are variables.
@@ -401,6 +402,7 @@
   (syntax-rules ()
     ((_ n (q) g0 g ...)
      (begin
+       (set! counter -1)
        (z/reset!)
        (take n
              (inc
