@@ -1,4 +1,16 @@
-# miniKanren-with-symbolic-constraints
+# CLP(SMT)-miniKanren
+
+A miniKanren variant integrated with the Z3 SMT solver.
+
+## API
+
+- `(smt-typeo <var> <type)`
+   for example: `(smt-typeo x 'Int)`
+
+- `(smt-asserto <prop>)`
+   for example: ```(smt-asserto `(= ,x 1))```
+
+# Original `faster-miniKanren`'s README: miniKanren-with-symbolic-constraints
 
 A revision of https://github.com/webyrd/miniKanren-with-symbolic-constraints/ for better performance. Up to 10x faster for large queries involving heavy use of constraints.
 
