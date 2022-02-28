@@ -2,6 +2,12 @@
 
 A miniKanren variant integrated with the Z3 SMT solver.
 
+## Environment
+
+Chez Scheme + Z3 version 4.8.12
+
+N.B. It currently supports for Scheme only. It can support Racket, but need some minor changes. Also, recommend Z3 Version 4.8.12.
+
 ## API
 
 - `(smt-typeo <var> <type)`
@@ -9,6 +15,41 @@ A miniKanren variant integrated with the Z3 SMT solver.
 
 - `(smt-asserto <prop>)`
    for example: ```(smt-asserto `(= ,x 1))```
+
+## Example
+
+```
+(load "require.scm")
+
+(define facto
+  (lambda (n out)
+    (fresh ()
+           (conde ((== n 0)
+                   (== out 1))
+                  ((smt-typeo n 'Int)
+                   (smt-asserto `(not (= ,n 0)))
+                   (fresh (n-1 r)
+                          (smt-typeo n-1 'Int)
+                          (smt-typeo r 'Int)
+                          (smt-typeo out 'Int)
+                          (smt-asserto `(= (- ,n 1) ,n-1))
+                          (smt-asserto `(= (* ,n ,r) ,out))
+                          (facto n-1 r)))))))
+(run 7 (q)
+           (fresh (n out)
+                  (facto n out)
+                  (== q `(,n ,out))))
+;; ((0 1) (1 1) (2 2) (3 6) (4 24) (5 120) (6 720))
+```
+
+Before calling `smt-asserto ` ensure all the variables inside `smt-asserto ` use correct SMT types by `smt-typeo`.
+
+## Debugging
+
+To display the generated SMT commands, uncomment `(define log-all-calls-with-file #t)` in `z3-server.scm`. When running, a `log.smt` will be created in the current working directory. 
+
+For console debugging, uncomment `(define log-all-calls #t)` and adjust log levels in `logging.scm`.
+
 
 # Original `faster-miniKanren`'s README: miniKanren-with-symbolic-constraints
 
