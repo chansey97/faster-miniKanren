@@ -2,6 +2,8 @@
 
 A miniKanren variant integrated with the Z3 SMT solver.
 
+See also:https://github.com/chansey97/clprosette-miniKanren
+
 ## Environment
 
 Chez Scheme + Z3 version 4.8.12
@@ -16,7 +18,7 @@ N.B. It currently supports for Scheme only. It can support Racket, but need some
 - `(smt-asserto <prop>)`
    for example: ```(smt-asserto `(= ,x 1))```
 
-## Example
+## Running
 
 ```
 (load "require.scm")
